@@ -100,14 +100,10 @@ extern "C" void testfunction_(double pointSet[][3], int* pointSetSize, int vtkCe
     unstructuredGrid->InsertNextCell(12, 8, ids);
   }
 
-  // if (*rank == 0){
-    // for(int i = 0; i < *pointSetSize; i++){
-      std::cout << "Total number of cells : " << unstructuredGrid->GetNumberOfCells() << "\n";
-    // }
-  // }
+  std::cout << "Total number of cells : " << unstructuredGrid->GetNumberOfCells() << "\n";
 
   unstructuredGrid->SetPoints(points);
-  //
+
   vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input")->SetGrid(unstructuredGrid);
 }
 

@@ -2,19 +2,22 @@ BUILD STEPS FOR PARAVIEW AND CATALYST
 ----------------------------------------------------------------------------------------------------
 // Get CMake versions 3.12 - 3.16 for Master Build
 
-// 1. Paraview build compilation using GCC 7.5.0 with Ubuntu 18.04 (RECOMMENDED)
+// 1. Ensure MPIRUN is not wrapped with OpenMPI
+sudo apt remove libopenmpi-dev openmpi-bin openmpi-common
+
+// 2. Paraview build compilation using GCC 7.5.0 with Ubuntu 18.04
 
 cmake -DPARAVIEW_USE_PYTHON=ON \
 	-DPARAVIEW_USE_MPI=ON \
 	-DPARAVIEW_USE_FORTRAN=ON \
 	-DPARAVIEW_BUILD_CATALYST_ADAPTORS=ON \
-	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort;/usr/bin/gfortran" \
+	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort \
 	-DCMAKE_C_COMPILER="/usr/bin/cc" \
 	-DMPI_C_COMPILER="/usr/bin/mpicc" ../paraview
 
 make -j 4
 
-// 2. Compile UCNS3D with Catalyst
+// 3. Compile UCNS3D with Catalyst
 
 cmake -DCMAKE_PREFIX_PATH="<Your_Paraview_Build_Dir>" \
 	-DCMAKE_BUILD_TYPE:STRING=Release \
@@ -26,7 +29,7 @@ cmake -DCMAKE_PREFIX_PATH="/home/jason/Desktop/pv_gcc_build" \
 
 make
 
-// 3. For testing of UCNS3D
+// 4. For testing of UCNS3D
 
 export OMP_NUM_THREADS=1
 cd CODE

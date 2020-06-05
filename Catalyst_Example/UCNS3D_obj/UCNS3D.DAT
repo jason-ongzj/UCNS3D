@@ -33,7 +33,7 @@ WENO RECONSTRUCTION: 1: CONSERVED 2: CHARACTERISTIC ||\|| STENCILS  ||\|| WEIGHT
 1								0				0					500000000000.0	
 |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 TEMPORAL ORDER: |(1-4):RK1-RK4, 5: RK-LTS, 10: IMPLICIT BACKWARD EULER |11: IMPLICIT 2ND-ORDER ||\|| CFL ||\||DTS TIMESTEP SIZE ||\|| ITERATION (FOR DTS ONLY) ||\|| Residual THRESHOLD
-3												     0.9		1.9			30				0.000001		
+4												     0.9		1.9			30				0.000001		
 |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 BOUNDARY CONDITIONS: 0: Non-Periodic 1: Periodic ||\||  BOUNDARY CONDITIONS: 0: SUPERSONIC 1: SUBSONIC  ||\||  SCALING FACTOR:
 1							0							0.1591549430919

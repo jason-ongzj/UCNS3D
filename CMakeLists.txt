@@ -11,7 +11,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../VT
 set(UCNS3D_ROOT /home/jason/Desktop/UCNS3D/CODE)
 #set(UCNS3D_ROOT "<Your_UCNS3D_Dir>")
 
-set(PARAVIEW_BUILD /home/jason/Desktop/pv_gcc_build) # GCC
+set(PARAVIEW_BUILD /home/jason/Desktop/pv_gcc_build) #GCC
 #set(PARAVIEW_BUILD /home/jason/Desktop/pv) # Intel
 #set(PARAVIEW_BUILD "<Your_Paraview_Build_Dir>")
 
