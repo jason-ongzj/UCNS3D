@@ -12285,8 +12285,8 @@ END IF
 
 IF (TECPLOT.EQ.3)THEN		!BINARY PARAVIEW 3D ONLY
 
-  call OUTWRITEPARA3DbP
-
+  ! call OUTWRITEPARA3DbP
+  call INSITUPARA3DbP
 END IF
 
 END SUBROUTINE GRID_WRITE
@@ -12390,11 +12390,11 @@ IMPLICIT NONE
 
 END IF
 
-IF (TECPLOT.EQ.3)THEN		!BINARY PARAVIEW 3D ONLY
-
-  call OUTWRITEPARA3DbP
-
-END IF
+! IF (TECPLOT.EQ.3)THEN		!BINARY PARAVIEW 3D ONLY
+!
+!   call OUTWRITEPARA3DbP
+!
+! END IF
 
 
 
@@ -15415,7 +15415,37 @@ end do
 
 END SUBROUTINE OUTWRITEPARA3DbP
 
+SUBROUTINE INSITUPARA3DbP
+!> @brief
+!> This subroutine writes the solution and the grid file in binary vtk format
+use ISO_C_BINDING
+IMPLICIT NONE
+INTEGER::KMAXE, I
 
+KMAXE=XMPIELRANK(N)
+
+if (ALLOCATED(scalarRU) .eqv. .FALSE.) ALLOCATE(scalarRU(kmaxe))
+if (ALLOCATED(scalarRV) .eqv. .FALSE.) ALLOCATE(scalarRV(kmaxe))
+if (ALLOCATED(scalarE) .eqv. .FALSE.) ALLOCATE(scalarE(kmaxe))
+
+! Scalar R        - J = 1
+! Scalar RU       - J = 2
+! Scalar RV       - J = 3
+! Scalar RW       - J = 4
+! Scalar E        - J = 5
+! Scalar species1 - J = 6
+! Scalar species2 - J = 7
+! Scalar voluemf  - J = 8
+
+DO i=1,Kmaxe
+  scalarRU(I)=U_C(I)%VAL(1,2)
+  scalarRV(I)=U_C(I)%VAL(1,3)
+  scalarE(I)=U_C(I)%VAL(1,5)
+END DO
+
+CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+
+END SUBROUTINE INSITUPARA3DbP
 
 
 SUBROUTINE OUTWRITEPARA3DbPav
