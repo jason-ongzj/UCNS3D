@@ -15353,7 +15353,7 @@ do j=1,NOF_VARIABLES
     WRITE(400+N)
     WRITE(400+N)"SCALARS  RV double 1"//lf
     DO i=1,Kmaxe
-      scalarRV(I)=U_C(I)%VAL(1,J)
+       scalarRV(I)=U_C(I)%VAL(1,J)
     END DO
     END IF
     IF (J.EQ.4)THEN

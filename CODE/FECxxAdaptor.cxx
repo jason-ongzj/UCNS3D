@@ -6,12 +6,14 @@
 #include "vtkCPProcessor.h"
 #include "vtkCPPythonScriptPipeline.h"
 #include "vtkDoubleArray.h"
+#include "vtkCellArray.h"
 #include "vtkImageData.h"
 #include "vtkPointData.h"
 #include "vtkPoints.h"
 #include "vtkCellData.h"
 #include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkCellDataToPointData.h"
 
 // Fortran specific header
 #include "vtkCPPythonAdaptorAPI.h"
@@ -115,23 +117,33 @@ extern "C" void addfield_(double* scalars, char* name)
   vtkCPInputDataDescription* idd =
     vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input");
 
-  // vtkImageData* image = vtkImageData::SafeDownCast(idd->GetGrid());
-
   vtkUnstructuredGrid* unstructuredGrid = vtkUnstructuredGrid::SafeDownCast(idd->GetGrid());
 
-  if (!unstructuredGrid)
-  {
+  if (!unstructuredGrid){
     vtkGenericWarningMacro("No adaptor grid to attach field data to.");
     return;
   }
 
-  // field name must match that in the fortran code.
-  if (idd->IsFieldNeeded(name, vtkDataObject::CELL))
-  {
+  // Field name must match that in the fortran code.
+  if (idd->IsFieldNeeded(name, vtkDataObject::CELL)){
     vtkSmartPointer<vtkDoubleArray> field = vtkSmartPointer<vtkDoubleArray>::New();
     field->SetNumberOfComponents(1);
     field->SetName(name);
     field->SetArray(scalars, unstructuredGrid->GetNumberOfCells(), 1);
     unstructuredGrid->GetCellData()->AddArray(field);
+  }
+
+  // Convert from cell to point data to allow contour visualization
+  vtkSmartPointer<vtkCellDataToPointData> cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
+  cellToPoint->SetInputData(unstructuredGrid);
+  cellToPoint->Update();
+
+  vtkPointData* pointData = cellToPoint->GetOutput()->GetPointData();
+
+  vtkSmartPointer<vtkDoubleArray> doubleArray =
+    vtkArrayDownCast<vtkDoubleArray>(cellToPoint->GetOutput()->GetPointData()->GetAbstractArray(name));
+
+  if (idd->IsFieldNeeded(name, vtkDataObject::POINT)){
+    unstructuredGrid->GetPointData()->AddArray(doubleArray);
   }
 }

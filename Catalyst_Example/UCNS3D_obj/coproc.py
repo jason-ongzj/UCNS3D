@@ -7,7 +7,7 @@ forceOutputAtFirstCall=False
 
 # Global screenshot output options
 imageFileNamePadding=0
-rescale_lookuptable=False
+rescale_lookuptable=True
 
 # Whether or not to request specific arrays from the adaptor.
 requestSpecificArrays=False
@@ -20,7 +20,7 @@ make_cinema_table=False
 
 #--------------------------------------------------------------
 # Code generated from cpstate.py to create the CoProcessor.
-# paraview version 5.8.0-636-gfeb3424073
+# paraview version 5.8.0
 #--------------------------------------------------------------
 
 from paraview.simple import *
@@ -31,13 +31,13 @@ from paraview import coprocessing
 def CreateCoProcessor():
   def _CreatePipeline(coprocessor, datadescription):
     class Pipeline:
-      # state file generated using paraview version 5.8.0-636-gfeb3424073
+      # state file generated using paraview version 5.8.0
 
       # ----------------------------------------------------------------
       # setup views used in the visualization
       # ----------------------------------------------------------------
 
-      # generated using paraview version 5.8.0-636-gfeb3424073
+      # trace generated using paraview version 5.8.0
       #
       # To ensure correct image size when batch processing, please search 
       # for and uncomment the line `# renderView*.ViewSize = [*,*]`
@@ -46,33 +46,22 @@ def CreateCoProcessor():
       paraview.simple._DisableFirstRenderCameraReset()
 
       # Create a new 'Render View'
-      renderView1 = CreateView('RenderView')
-      renderView1.ViewSize = [900, 522]
-      renderView1.AxesGrid = 'GridAxes3DActor'
-      renderView1.CenterOfRotation = [3.1415927410125732, 3.1415927410125732, 3.1415927410125732]
-      renderView1.StereoType = 'Crystal Eyes'
-      renderView1.CameraPosition = [-6.962290992619889, 13.00713402789492, 18.716862694358497]
-      renderView1.CameraFocalPoint = [3.141592741012574, 3.1415927410125715, 3.1415927410125755]
-      renderView1.CameraViewUp = [0.21276442893019504, 0.8819412362199431, -0.4206078382969658]
-      renderView1.CameraFocalDisk = 1.0
-      renderView1.CameraParallelScale = 5.44139824412335
+      renderView4 = CreateView('RenderView')
+      renderView4.ViewSize = [1256, 799]
+      renderView4.AxesGrid = 'GridAxes3DActor'
+      renderView4.CenterOfRotation = [50.30695152282715, 0.0, 9.869604110717773]
+      renderView4.StereoType = 'Crystal Eyes'
+      renderView4.CameraPosition = [35.82379571216059, -3.9871568578962098, 329.7784155802543]
+      renderView4.CameraFocalPoint = [35.82379571216059, -3.9871568578962098, 9.869604110717773]
+      renderView4.CameraFocalDisk = 1.0
+      renderView4.CameraParallelScale = 121.2252737541929
 
       # register the view with coprocessor
       # and provide it with information such as the filename to use,
       # how frequently to write the images, etc.
-      coprocessor.RegisterView(renderView1,
-          filename='RenderView1_%t.png', freq=10, fittoscreen=0, magnification=1, width=900, height=522, cinema={}, compression=5)
-      renderView1.ViewTime = datadescription.GetTime()
-
-      # Create a new 'Render View'
-      renderView2 = CreateView('RenderView')
-      renderView2.AxesGrid = 'GridAxes3DActor'
-      renderView2.CenterOfRotation = [3.1415927410125732, 3.1415927410125732, 3.1415927410125732]
-      renderView2.StereoType = 'Crystal Eyes'
-      renderView2.CameraFocalDisk = 1.0
-      renderView2.CameraParallelScale = 5.44139824412335
-      # uncomment following to set a specific view size
-      # renderView2.ViewSize = [400, 400]
+      coprocessor.RegisterView(renderView4,
+          filename='RenderView4_%t.png', freq=20, fittoscreen=0, magnification=1, width=1477, height=799, cinema={}, compression=5)
+      renderView4.ViewTime = datadescription.GetTime()
 
       SetActiveView(None)
 
@@ -82,11 +71,11 @@ def CreateCoProcessor():
 
       # create new layout object 'Layout #1'
       layout1 = CreateLayout(name='Layout #1')
-      layout1.AssignView(0, renderView1)
+      layout1.AssignView(0, renderView4)
 
       # ----------------------------------------------------------------
       # restore active view
-      SetActiveView(renderView1)
+      SetActiveView(renderView4)
       # ----------------------------------------------------------------
 
       # ----------------------------------------------------------------
@@ -94,84 +83,68 @@ def CreateCoProcessor():
       # ----------------------------------------------------------------
 
       # create a new 'PVTrivialProducer'
-      # create a producer from a simulation input
-      input = coprocessor.CreateProducer(datadescription, 'input')
+      # extractinput = PVTrivialProducer()
+      extractinput = coprocessor.CreateProducer(datadescription, 'input')
 
       # ----------------------------------------------------------------
-      # setup the visualization in view 'renderView1'
+      # setup the visualization in view 'renderView4'
       # ----------------------------------------------------------------
 
-      # show data from input
-      inputDisplay = Show(input, renderView1, 'UnstructuredGridRepresentation')
+      # show data from extractinput
+      extractinputDisplay = Show(extractinput, renderView4, 'UnstructuredGridRepresentation')
 
       # get color transfer function/color map for 'RU'
       rULUT = GetColorTransferFunction('RU')
-      rULUT.AutomaticRescaleRangeMode = 'Clamp and update every timestep'
-      rULUT.RGBPoints = [-0.9330251951608441, 0.231373, 0.298039, 0.752941, 0.0022094683390114778, 0.865003, 0.865003, 0.865003, 0.9374441318388671, 0.705882, 0.0156863, 0.14902]
+      rULUT.RGBPoints = [-0.9946198892277626, 0.231373, 0.298039, 0.752941, 3.3306690738754696e-16, 0.865003, 0.865003, 0.865003, 0.9946198892277632, 0.705882, 0.0156863, 0.14902]
       rULUT.ScalarRangeInitialized = 1.0
 
       # get opacity transfer function/opacity map for 'RU'
       rUPWF = GetOpacityTransferFunction('RU')
-      rUPWF.Points = [-0.9330251951608441, 0.0, 0.5, 0.0, 0.9374441318388671, 1.0, 0.5, 0.0]
+      rUPWF.Points = [-0.9946198892277626, 0.0, 0.5, 0.0, 0.9946198892277632, 1.0, 0.5, 0.0]
       rUPWF.ScalarRangeInitialized = 1
 
       # trace defaults for the display properties.
-      inputDisplay.Representation = 'Surface'
-      inputDisplay.ColorArrayName = ['CELLS', 'RU']
-      inputDisplay.LookupTable = rULUT
-      inputDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
-      inputDisplay.SelectOrientationVectors = 'None'
-      inputDisplay.ScaleFactor = 0.6283185482025146
-      inputDisplay.SelectScaleArray = 'None'
-      inputDisplay.GlyphType = 'Arrow'
-      inputDisplay.GlyphTableIndexArray = 'None'
-      inputDisplay.GaussianRadius = 0.031415927410125735
-      inputDisplay.SetScaleArray = [None, '']
-      inputDisplay.ScaleTransferFunction = 'PiecewiseFunction'
-      inputDisplay.OpacityArray = [None, '']
-      inputDisplay.OpacityTransferFunction = 'PiecewiseFunction'
-      inputDisplay.DataAxesGrid = 'GridAxesRepresentation'
-      inputDisplay.PolarAxes = 'PolarAxesRepresentation'
-      inputDisplay.ScalarOpacityFunction = rUPWF
-      inputDisplay.ScalarOpacityUnitDistance = 0.5398550810562074
+      extractinputDisplay.Representation = 'Surface'
+      extractinputDisplay.ColorArrayName = ['CELLS', 'RU']
+      extractinputDisplay.LookupTable = rULUT
+      extractinputDisplay.OSPRayScaleArray = 'E'
+      extractinputDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
+      extractinputDisplay.SelectOrientationVectors = 'E'
+      extractinputDisplay.ScaleFactor = 21.35453681945801
+      extractinputDisplay.SelectScaleArray = 'E'
+      extractinputDisplay.GlyphType = 'Arrow'
+      extractinputDisplay.GlyphTableIndexArray = 'E'
+      extractinputDisplay.GaussianRadius = 1.0677268409729004
+      extractinputDisplay.SetScaleArray = ['POINTS', 'E']
+      extractinputDisplay.ScaleTransferFunction = 'PiecewiseFunction'
+      extractinputDisplay.OpacityArray = ['POINTS', 'E']
+      extractinputDisplay.OpacityTransferFunction = 'PiecewiseFunction'
+      extractinputDisplay.DataAxesGrid = 'GridAxesRepresentation'
+      extractinputDisplay.PolarAxes = 'PolarAxesRepresentation'
+      extractinputDisplay.ScalarOpacityFunction = rUPWF
+      extractinputDisplay.ScalarOpacityUnitDistance = 2.6210131800440215
+
+      # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+      extractinputDisplay.ScaleTransferFunction.Points = [0.0, 0.0, 0.5, 0.0, 253.52381186434286, 1.0, 0.5, 0.0]
+
+      # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+      extractinputDisplay.OpacityTransferFunction.Points = [0.0, 0.0, 0.5, 0.0, 253.52381186434286, 1.0, 0.5, 0.0]
 
       # setup the color legend parameters for each legend in this view
 
-      # get color legend/bar for rULUT in view renderView1
-      rULUTColorBar = GetScalarBar(rULUT, renderView1)
+      # get color legend/bar for rULUT in view renderView4
+      rULUTColorBar = GetScalarBar(rULUT, renderView4)
+      rULUTColorBar.WindowLocation = 'AnyLocation'
+      rULUTColorBar.Position = [0.045485640938839986, 0.35294117647058826]
       rULUTColorBar.Title = 'RU'
       rULUTColorBar.ComponentTitle = ''
+      rULUTColorBar.ScalarBarLength = 0.3300000000000001
 
       # set color bar visibility
       rULUTColorBar.Visibility = 1
 
       # show color legend
-      inputDisplay.SetScalarBarVisibility(renderView1, True)
-
-      # ----------------------------------------------------------------
-      # setup the visualization in view 'renderView2'
-      # ----------------------------------------------------------------
-
-      # show data from input
-      inputDisplay_1 = Show(input, renderView2, 'UnstructuredGridRepresentation')
-
-      # trace defaults for the display properties.
-      inputDisplay_1.Representation = 'Surface'
-      inputDisplay_1.ColorArrayName = [None, '']
-      inputDisplay_1.OSPRayScaleFunction = 'PiecewiseFunction'
-      inputDisplay_1.SelectOrientationVectors = 'None'
-      inputDisplay_1.ScaleFactor = 0.6283185482025146
-      inputDisplay_1.SelectScaleArray = 'None'
-      inputDisplay_1.GlyphType = 'Arrow'
-      inputDisplay_1.GlyphTableIndexArray = 'None'
-      inputDisplay_1.GaussianRadius = 0.031415927410125735
-      inputDisplay_1.SetScaleArray = [None, '']
-      inputDisplay_1.ScaleTransferFunction = 'PiecewiseFunction'
-      inputDisplay_1.OpacityArray = [None, '']
-      inputDisplay_1.OpacityTransferFunction = 'PiecewiseFunction'
-      inputDisplay_1.DataAxesGrid = 'GridAxesRepresentation'
-      inputDisplay_1.PolarAxes = 'PolarAxesRepresentation'
-      inputDisplay_1.ScalarOpacityUnitDistance = 0.5398550810562074
+      extractinputDisplay.SetScalarBarVisibility(renderView4, True)
 
       # ----------------------------------------------------------------
       # setup color maps and opacity mapes used in the visualization
@@ -180,7 +153,7 @@ def CreateCoProcessor():
 
       # ----------------------------------------------------------------
       # finally, restore active source
-      SetActiveSource(input)
+      SetActiveSource(extractinput)
       # ----------------------------------------------------------------
     return Pipeline()
 
@@ -190,11 +163,8 @@ def CreateCoProcessor():
 
   coprocessor = CoProcessor()
   # these are the frequencies at which the coprocessor updates.
-  freqs = {'input': [10]}
+  freqs = {'input': [20]}
   coprocessor.SetUpdateFrequencies(freqs)
-  if requestSpecificArrays:
-    arrays = [['E', 1], ['RU', 1], ['RV', 1]]
-    coprocessor.SetRequestedArrays('input', arrays)
   coprocessor.SetInitialOutputOptions(timeStepToStartOutputAt,forceOutputAtFirstCall)
 
   if rootDirectory:
@@ -241,7 +211,7 @@ def DoCoProcessing(datadescription):
     coprocessor.WriteData(datadescription);
 
     # Write image capture (Last arg: rescale lookup table), if appropriate.
-    coprocessor.WriteImages(datadescription, rescale_lookuptable=True,
+    coprocessor.WriteImages(datadescription, rescale_lookuptable=rescale_lookuptable,
         image_quality=0, padding_amount=imageFileNamePadding)
 
     # Live Visualization, if enabled.
