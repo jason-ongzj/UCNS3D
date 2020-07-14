@@ -1,4 +1,8 @@
 add_executable(ucns3d_p
+  FEDataStructures.cxx
+  FEDataStructures.h
+  FEAdaptor.cxx
+  FEAdaptor.h
   FECxxAdaptor.cxx
   declarations.f90
   translate.f90

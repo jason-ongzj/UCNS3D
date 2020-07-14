@@ -14,6 +14,8 @@
 #include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkCellDataToPointData.h"
+#include "FEDataStructures.h"
+#include "FEAdaptor.h"
 
 // Fortran specific header
 #include "vtkCPPythonAdaptorAPI.h"
@@ -21,26 +23,49 @@
 // These will be called from the Fortran "glue" code"
 // Completely dependent on data layout, structured vs. unstructured, etc.
 // since VTK/ParaView uses different internal layouts for each.
-
-// Creates the data container for the CoProcessor.
-extern "C" void createcpimagedata_(int* nxstart, int* nxend, int* nx, int* ny, int* nz)
+namespace
 {
-  if (!vtkCPPythonAdaptorAPI::GetCoProcessorData())
+  Grid grid;
+  Attributes attributes;
+
+  // For conversion of C++ to Fortran functions, function names have to be
+  // non-captialized since Fortran subroutines are case-insensitive.
+  extern "C" void gridfunction_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank)
   {
-    vtkGenericWarningMacro("Unable to access CoProcessorData.");
-    return;
+    grid.Initialize(pointSet, pointSetSize, vtkCellId, vtkCellIdSetSize);
+    attributes.Initialize(&grid);
+    std::cout << "Rank " << *rank << ": Checking size of pointSet in Grid object: " << grid.GetNumberOfPoints() << "\n";
+    std::cout << "Rank " << *rank << ": Checking number of cells in Grid object: " << grid.GetNumberOfCells() << "\n";
+    FEAdaptor::BuildGrid(grid);
   }
 
-  // The simulation grid is a 3-dimensional topologically and geometrically
-  // regular grid. In VTK/ParaView, this is considered an image data set.
-  vtkSmartPointer<vtkImageData> grid = vtkSmartPointer<vtkImageData>::New();
+  extern "C" void densityfunction_(double* scalars)
+  {
+    attributes.UpdateFields(scalars, DENSITY);
+    double* rho = attributes.GetRhoArray();
+    int count = 0;
+    std::cout << "Density: " << *(rho + 1) << "\n";
+  }
 
-  grid->SetExtent(*nxstart - 1, *nxend - 1, 0, *ny - 1, 0, *nz - 1);
+  extern "C" void scalarsfunction_(double* scalars)
+  {
+    attributes.UpdateFields(scalars, VELOCITY_X);
+    double* velocity_x = attributes.GetUArray();
+    int count = 0;
+    if (velocity_x != NULL){
+      std::cout << "U: " << *(velocity_x + 1) << "\n";
+    }
+  }
 
-  // Name should be consistent between here, Fortran and Python client script.
-  vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input")->SetGrid(grid);
-  vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input")->SetWholeExtent(
-    0, *nx - 1, 0, *ny - 1, 0, *nz - 1);
+  extern "C" void coprocessor_finalize_()
+  {
+    FEAdaptor::Finalize();
+  }
+
+  extern "C" void coprocessor_initialize_(int outputFrequency)
+  {
+    FEAdaptor::Initialize(outputFrequency);
+  }
 }
 
 extern "C" void testfunction_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank, int* numprocs)
@@ -69,25 +94,6 @@ extern "C" void testfunction_(double pointSet[][3], int* pointSetSize, int vtkCe
   std::cout << "Process " << *rank << " with " <<  *numprocs << " processes involved."<< "\n";
   std::cout << "Checking size of pointSet: " << *pointSetSize << "\n";
   std::cout << "Checking size of vtkCellId: " << *vtkCellIdSetSize << "\n\n";
-
-  // Testing pointSet output
-  // if (*rank == 0){
-  //   for(int i = 0; i < *pointSetSize; i++){
-  //     std::cout << i+1 << ' ' << pointSet[i][0] << std::setprecision(10) << ' '
-  //               << pointSet[i][1] << std::setprecision(10) << ' '
-  //               << pointSet[i][2] << std::setprecision(10) << '\n';
-  //   }
-  // }
-  // Testing vtkCellId output
-  // if(*rank == 0){
-    // for(int j = 0; j < *vtkCellIdSetSize; j++){
-    //   for(int k = 0; k < 8; k++){
-    //     connectivity_array[j*8 + k] = vtkCellId[j][k];
-    //     if(k == 0){
-    //       offsets_array[j] = j*8;
-    //     }
-    //   }
-    // }
 
   // Serial process of registering point set
   for(int i=0; i < *pointSetSize; i++){
