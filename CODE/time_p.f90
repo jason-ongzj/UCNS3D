@@ -13,7 +13,8 @@ USE implicit_time
 USE implicit_FLUXES
 ! USE FLUXES_V
 USE IO
-USE tcp
+USE, INTRINSIC :: ISO_C_BINDING
+! USE tcp
 IMPLICIT NONE
 
  CONTAINS
@@ -2972,7 +2973,7 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 
 
 	IT=RESTART
-
+  ! IT=0
 !$OMP BARRIER
 !$OMP MASTER
       CALL GRID_WRITE
@@ -3026,7 +3027,10 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			TIMEC3=DUMMYIN(3)
 			TIMEC4=DUMMYIN(4)
 			TIMEC8=DUMMYIN(5)
-          call coprocess_grid(IT, dble(T))
+          ! call coprocess_grid(IT, dble(T))
+          ! call densityfunction(scalarR)
+          call gridfunction(pointSet, kmaxn, el_connect, XMPIELRANK(N), N)
+          call coproc_grid(dble(T))
 				   IF (N.EQ.0)THEN
 				  OPEN(63,FILE='history.txt',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
 				  WRITE(63,*)DT,it,"TIME STEP SIZE",T

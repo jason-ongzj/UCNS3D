@@ -1,9 +1,11 @@
 add_executable(ucns3d_p
+  vtkCPVTKPipeline.cxx
+  vtkCPVTKPipeline.h
   FEDataStructures.cxx
   FEDataStructures.h
   FEAdaptor.cxx
   FEAdaptor.h
-  FECxxAdaptor.cxx
+  FEDriver.cxx
   declarations.f90
   translate.f90
   grid_t.f90
@@ -32,7 +34,7 @@ add_executable(ucns3d_p
   der_r.f90
   svd.f90
   local_pt.f90
-  FEFortranAdaptor.f90
+  # FEFortranAdaptor.f90
   main.f90
   libparmetis.a
   libmetis.a
@@ -60,13 +62,31 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
   target_link_libraries(ucns3d_p
   PRIVATE
     ${MPI_Fortran_LIBRARIES}  ParMetis Metis TecIo -no-pie
-    ParaView::PythonCatalyst
+    # ParaView::PythonCatalyst
     VTK::CommonDataModel
     VTK::IOLegacy
     VTK::FiltersCore
     ${BLASLIBS} openblas
   )
-else () 
+
+  if (${USE_PYTHON})
+    target_link_libraries(ucns3d_p
+    PRIVATE
+      ParaView::PythonCatalyst
+    )
+  else ()
+    target_link_libraries(ucns3d_p
+    PRIVATE
+      ParaView::Catalyst
+      ParaView::VTKExtensionsCore
+      VTK::IOImage
+      VTK::ViewsInfovis
+      VTK::RenderingAnnotation
+    )
+  endif ()
+
+else ()
+
   # Static MKL libraries on HPC
   add_library(Mkl_Intel_Lp64 STATIC IMPORTED)
   set_target_properties(Mkl_Intel_Lp64 PROPERTIES
@@ -82,7 +102,7 @@ else ()
   set_target_properties(Mkl_Core PROPERTIES
     IMPORTED_LOCATION ${MKLROOT}/lib/intel64/libmkl_core.a
   )
-  
+
   # Paraview shared libraries on HPC
   add_library(PVPythonCatalyst SHARED IMPORTED)
   set_target_properties(PVPythonCatalyst PROPERTIES
@@ -167,7 +187,7 @@ else ()
     PythonInterpreter Python_3
     IOCore PVCatalyst FiltersCore CommonExecutionModel
     CommonDataModel CommonTransforms CommonSystem
-    CommonMisc CommonMath CommonCore Sys 
+    CommonMisc CommonMath CommonCore Sys
     dl stdc++ -Wl,-rpath-link,${PARAVIEW_BUILD_LIB}
   )
 

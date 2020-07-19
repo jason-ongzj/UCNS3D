@@ -48,14 +48,16 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
   set(CMAKE_PREFIX_PATH ${PARAVIEW_BUILD} CACHE STRING "")
   find_package(ParaView REQUIRED)
 
-  # Check if Catalyst is enabled for Paraview
-  if (NOT TARGET ParaView::PythonCatalyst)
-    message(STATUS
-      "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
-      "with Catalyst and Python support enabled. Please rebuild ParaView (or "
-      "point to a different build of ParaView) with PARAVIEW_ENABLE_PYTHON set "
-      "to TRUE")
-    return ()
+  # Check if Python Catalyst is enabled for Paraview
+  if (USE_PYTHON)
+    if (NOT TARGET ParaView::PythonCatalyst)
+      message(STATUS
+        "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
+        "with Catalyst and Python support enabled. Please rebuild ParaView (or "
+        "point to a different build of ParaView) with PARAVIEW_ENABLE_PYTHON set "
+        "to TRUE")
+      return ()
+    endif ()
   endif ()
 
   # Check if MPI is enabled for Paraview
@@ -66,7 +68,7 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
       "different build of ParaView) with PARAVIEW_USE_MPI set to TRUE")
     return ()
   endif ()
-  
+
 else ()
   # Compile with Intel compilers if compiled on Crescent
   set(PARAVIEW_BUILD_LIB "${PARAVIEW_CRESCENT_BUILD}/lib64")

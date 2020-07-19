@@ -56,6 +56,15 @@ cmake -DPARAVIEW_USE_PYTHON=ON \
 	-DCMAKE_C_COMPILER="/usr/bin/cc" \
 	-DMPI_C_COMPILER="/usr/bin/mpicc" ../paraview
 
+// Without Python
+cmake -DPARAVIEW_USE_PYTHON=OFF \
+	-DPARAVIEW_USE_MPI=ON \
+	-DPARAVIEW_USE_FORTRAN=ON \
+	-DPARAVIEW_BUILD_CATALYST_ADAPTORS=ON \
+	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" \
+	-DCMAKE_C_COMPILER="/usr/bin/cc" \
+	-DMPI_C_COMPILER="/usr/bin/mpicc" ../paraview
+
 -------------------------------------------------
 // For building on HPC
 
@@ -154,7 +163,21 @@ cmake -DPARAVIEW_BUILD="$HOME/Desktop/pv_5.8" \
 	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../
 
 // Release
+parentdir="$(dirname "$(pwd)")"
 cmake -DPARAVIEW_BUILD="$HOME/Desktop/pv_5.8" \
+	-DUCNS3D_ROOT="$parentdir/CODE" \
+	-DCOMPILE_TARGET="LOCAL" \
+	-DCMAKE_BUILD_TYPE:STRING=Release \
+	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../
+
+cmake -DPARAVIEW_BUILD="$HOME/Desktop/pv_5.8" \
+	-DUCNS3D_ROOT="/home/jason/Desktop/UCNS3D/CODE" \
+	-DCOMPILE_TARGET="LOCAL" \
+	-DCMAKE_BUILD_TYPE:STRING=Release \
+	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../
+
+cmake -DPARAVIEW_BUILD="$HOME/Desktop/pv_5.8_catalyst-rendering_nopy" \
+	-DUSE_PYTHON:BOOL=FALSE \
 	-DUCNS3D_ROOT="/home/jason/Desktop/UCNS3D/CODE" \
 	-DCOMPILE_TARGET="LOCAL" \
 	-DCMAKE_BUILD_TYPE:STRING=Release \

@@ -12,7 +12,7 @@ subroutine coprocess_grid(step,time)
 
   integer, intent(in) :: step
   real*8, intent(in) :: time
-  integer :: flag
+  integer :: flag, var = 2
   !
   call requestdatadescription(step,time,flag)
   !
@@ -23,7 +23,7 @@ subroutine coprocess_grid(step,time)
       call testfunction(pointSet, kmaxn, el_connect, XMPIELRANK(N), N, ISIZE)
     end if
 
-    ! call densityfunction(scalarR);
+    call densityfunction(scalarR);
     call scalarsfunction(scalarRU);
     call addfield(scalarR, "R"//char(0))
     call addfield(scalarRU, "RU"//char(0))

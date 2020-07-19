@@ -754,7 +754,8 @@ CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
  if (n.eq.0)print*,"UCNS3D Running"
 
- call coprocessorinitializewithpython("coproc.py",9)
+ ! call coprocessorinitializewithpython("coproc.py",9)
+ call coprocessor_initialize(1)
 
    if (dimensiona.eq.3)then
 !$OMP PARALLEL DEFAULT(SHARED)
@@ -768,7 +769,8 @@ CALL TIME_MARCHING2(N)
 
 end if
 
-CALL coprocessorfinalize()
+call coprocessor_finalize();
+! CALL coprocessorfinalize()
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
   CPUX3(1) = MPI_Wtime()

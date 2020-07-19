@@ -2,19 +2,9 @@
 #define FEADAPTOR_HEADER
 
 #include <string>
-#include <vtkCPInputDataDescription.h>
 
 class Attributes;
 class Grid;
-
-namespace Local
-{
-  void BuildVTKGrid(Grid& grid);
-
-  void UpdateVTKAttributes(Grid& grid, vtkCPInputDataDescription* idd);
-
-  void BuildVTKDataStructure(Grid& grid, vtkCPInputDataDescription* idd);
-}
 
 namespace FEAdaptor
 {
@@ -24,7 +14,7 @@ namespace FEAdaptor
 
   void BuildGrid(Grid& grid);
 
-  void CoProcess();
+  void CoProcess(Grid& grid, Attributes& attributes, double time);
 }
 
 #endif

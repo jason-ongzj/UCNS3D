@@ -91,53 +91,65 @@ void Attributes::UpdateFields(double* scalars, Variable var)
   int cellCount = GridPtr->GetNumberOfCells();
   switch (var) {
     case DENSITY:
-      for (int i = 0; i < cellCount; i++)
       {
-        Rho.insert(Rho.begin()+i, *(scalars + i));
+        for (int i = 0; i < cellCount; i++)
+        {
+          Rho.insert(Rho.begin()+i, *(scalars + i));
+        }
+        break;
       }
-      break;
+
     case VELOCITY_X:
-      try {
-        if (Rho.empty()) {
-          throw 'a';
-        } else {
-          for (int i = 0; i < cellCount; i++){
-            double rho = Rho.at(i);
-            U.insert(U.begin()+i, *(scalars + i)/rho);
+      {
+        try {
+          if (Rho.empty()) {
+            throw 'a';
+          } else {
+            for (int i = 0; i < cellCount; i++){
+              double rho = Rho.at(i);
+              U.insert(U.begin()+i, *(scalars + i)/rho);
+            }
           }
+        } catch (...) {
+          std::cout << "Density array not found!" << "\n";
         }
-      } catch (...) {
-        std::cout << "Density array not found!" << "\n";
+        break;
       }
-      break;
+
     case VELOCITY_Y:
-      try {
-        if (Rho.empty()) {
-          throw 'a';
-        } else {
-          for (int i = 0; i < cellCount; i++){
-            double rho = Rho.at(i);
-            V.insert(V.begin()+i, *(scalars + i)/rho);
+      {
+        try {
+          if (Rho.empty()) {
+            throw 'a';
+          } else {
+            for (int i = 0; i < cellCount; i++){
+              double rho = Rho.at(i);
+              V.insert(V.begin()+i, *(scalars + i)/rho);
+            }
           }
+        } catch (...) {
+          std::cout << "Density array not found!" << "\n";
         }
-      } catch (...) {
-        std::cout << "Density array not found!" << "\n";
+        break;
       }
-      break;
+
     case VELOCITY_Z:
-      try {
-        if (Rho.empty()) {
-          throw 'a';
-        } else {
-          for (int i = 0; i < cellCount; i++){
-            double rho = Rho.at(i);
-            W.insert(W.begin()+i, *(scalars + i)/rho);
+      {
+        try {
+          if (Rho.empty()) {
+            throw 'a';
+          } else {
+            for (int i = 0; i < cellCount; i++){
+              double rho = Rho.at(i);
+              W.insert(W.begin()+i, *(scalars + i)/rho);
+            }
           }
+        } catch (...) {
+          std::cout << "Density array not found!" << "\n";
         }
-      } catch (...) {
-        std::cout << "Density array not found!" << "\n";
+        break;
       }
-      break;
+
     case ENERGY:
       break;
   }
