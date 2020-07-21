@@ -30,7 +30,7 @@ USE RIEMANN
 USE SOURCE
 USE implicit_time
 USE implicit_FLUXES
-USE tcp
+! USE tcp
 
 
 
@@ -755,7 +755,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
  if (n.eq.0)print*,"UCNS3D Running"
 
  ! call coprocessorinitializewithpython("coproc.py",9)
- call coprocessor_initialize(1)
+ call coprocessor_initialize(2)
 
    if (dimensiona.eq.3)then
 !$OMP PARALLEL DEFAULT(SHARED)

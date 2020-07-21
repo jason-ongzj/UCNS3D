@@ -33,6 +33,7 @@ class Attributes
     void Initialize(Grid* grid);
 
     void UpdateFields(double* scalars, Variable var);
+    Grid* GetGrid();
     double* GetRhoArray();
     double* GetUArray();
     double* GetVArray();

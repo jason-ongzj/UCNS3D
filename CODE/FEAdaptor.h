@@ -12,8 +12,6 @@ namespace FEAdaptor
 
   void Finalize();
 
-  void BuildGrid(Grid& grid);
-
   void CoProcess(Grid& grid, Attributes& attributes, double time);
 }
 

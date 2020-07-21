@@ -155,6 +155,11 @@ void Attributes::UpdateFields(double* scalars, Variable var)
   }
 }
 
+Grid* Attributes::GetGrid()
+{
+  return this->GridPtr;
+}
+
 double* Attributes::GetRhoArray()
 {
   return &(this->Rho[0]);

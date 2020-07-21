@@ -3030,6 +3030,12 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
           ! call coprocess_grid(IT, dble(T))
           ! call densityfunction(scalarR)
           call gridfunction(pointSet, kmaxn, el_connect, XMPIELRANK(N), N)
+          call densityfunction(scalarR)
+          write(*,*) "scalarR: ", scalarR(1), ", rank: ", N
+          call scalarsfunction(scalarRU, 1)
+          write(*,*) "scalarRU: ", scalarRU(1), ", rank: ", N
+          call scalarsfunction(scalarRV, 2)
+          write(*,*) "scalarRV: ", scalarRV(1), ", rank: ", N
           call coproc_grid(dble(T))
 				   IF (N.EQ.0)THEN
 				  OPEN(63,FILE='history.txt',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')

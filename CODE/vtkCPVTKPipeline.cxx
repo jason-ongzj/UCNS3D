@@ -42,6 +42,8 @@ void vtkCPVTKPipeline::Initialize(int outputFrequency)
 
 int vtkCPVTKPipeline::RequestDataDescription(vtkCPDataDescription* dataDescription)
 {
+  // std::cout << "RequestDataDescription: " << dataDescription->GetTimeStep() % this->OutputFrequency << "\n";
+
   if (!dataDescription)
   {
     vtkWarningMacro("dataDescription is NULL.");
@@ -49,8 +51,7 @@ int vtkCPVTKPipeline::RequestDataDescription(vtkCPDataDescription* dataDescripti
   }
 
   if (dataDescription->GetForceOutput() == true ||
-    this->OutputFrequency != 0 )
-      // && dataDescription->GetTimeStep() % this->OutputFrequency == 0))
+    (this->OutputFrequency != 0 && dataDescription->GetTimeStep() % this->OutputFrequency == 0))
   {
     dataDescription->GetInputDescriptionByName("input")->AllFieldsOn();
     dataDescription->GetInputDescriptionByName("input")->GenerateMeshOn();
@@ -107,7 +108,8 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     imgwriter = vtkSmartPointer<vtkPNGWriter>::New();
   }
 
-  vtkNew<vtkPVTrivialProducer> producer;
+  vtkSmartPointer<vtkPVTrivialProducer> producer =
+    vtkSmartPointer<vtkPVTrivialProducer>::New();
   producer->SetOutput(grid);
 
   vtkSmartPointer<vtkCellDataToPointData> cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
@@ -116,7 +118,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
 
   std::string fieldName = "U";
 
-  vtkPointData* pointData = cellToPoint->GetOutput()->GetPointData();
+  vtkSmartPointer<vtkPointData> pointData = cellToPoint->GetOutput()->GetPointData();
   vtkSmartPointer<vtkAbstractArray> scalarRU = pointData->GetAbstractArray(fieldName.c_str());
 
   vtkSmartPointer<vtkScalarsToColors> scalarToColor = vtkSmartPointer<vtkScalarsToColors>::New();
@@ -161,4 +163,6 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   imgwriter->SetFileName(fileName.c_str());
   imgwriter->SetInputConnection(window_to_image_filter->GetOutputPort());
   imgwriter->Write();
+
+  grid->Delete();
 }

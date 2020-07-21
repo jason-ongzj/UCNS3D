@@ -32,33 +32,57 @@ namespace
   // non-captialized since Fortran subroutines are case-insensitive.
   extern "C" void gridfunction_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank)
   {
-    grid.Initialize(pointSet, pointSetSize, vtkCellId, vtkCellIdSetSize);
-    attributes.Initialize(&grid);
-    std::cout << "Rank " << *rank << ": Checking size of pointSet in Grid object: " << grid.GetNumberOfPoints() << "\n";
-    std::cout << "Rank " << *rank << ": Checking number of cells in Grid object: " << grid.GetNumberOfCells() << "\n";
-    // FEAdaptor::BuildGrid(grid);
+    if (attributes.GetGrid() == NULL){
+      grid.Initialize(pointSet, pointSetSize, vtkCellId, vtkCellIdSetSize);
+      attributes.Initialize(&grid);
+      std::cout << "Rank " << *rank << ": Checking size of pointSet in Grid object: " << grid.GetNumberOfPoints() << "\n";
+      std::cout << "Rank " << *rank << ": Checking number of cells in Grid object: " << grid.GetNumberOfCells() << "\n";
+      // FEAdaptor::BuildGrid(grid);
+    }
   }
 
   extern "C" void densityfunction_(double* scalars)
   {
     attributes.UpdateFields(scalars, DENSITY);
     double* rho = attributes.GetRhoArray();
-    int count = 0;
+    // int count = 0;
     std::cout << "Density: " << *(rho + 1) << "\n";
+    // delete rho;
   }
 
-  extern "C" void scalarsfunction_(double* scalars)
+  extern "C" void scalarsfunction_(double* scalars, int* scalarDimension)
   {
-    attributes.UpdateFields(scalars, VELOCITY_X);
     double* velocity_x = attributes.GetUArray();
-    if (velocity_x){
-      std::cout << "U: " << *(velocity_x + 1) << "\n";
+    double* velocity_y = attributes.GetVArray();
+    double* velocity_z = attributes.GetVArray();
+    switch(*scalarDimension){
+      case UX:
+        attributes.UpdateFields(scalars, VELOCITY_X);
+        if (velocity_x){
+          std::cout << "U: " << *(velocity_x) << "\n";
+        }
+        break;
+      case UY:
+        attributes.UpdateFields(scalars, VELOCITY_Y);
+        if (velocity_y){
+          std::cout << "V: " << *(velocity_y) << "\n";
+        }
+        break;
+      case UZ:
+        attributes.UpdateFields(scalars, VELOCITY_Z);
+        if (velocity_z){
+          std::cout << "W: " << *(velocity_z + 1) << "\n";
+        }
+        break;
     }
+    // delete velocity_x;
+    // delete velocity_y;
+    // delete velocity_z;
   }
 
-  extern "C" void coprocessor_initialize_(int outputFrequency)
+  extern "C" void coprocessor_initialize_(int* outputFrequency)
   {
-    FEAdaptor::Initialize(outputFrequency);
+    FEAdaptor::Initialize(*outputFrequency);
   }
 
   extern "C" void coproc_grid_(double time)

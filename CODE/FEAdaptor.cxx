@@ -53,22 +53,24 @@ namespace
       << vtkGrid->GetNumberOfCells() << "\n";
   }
 
-  void UpdateVTKAttributes(Grid& grid, Attributes& attributes, vtkCPInputDataDescription* idd)
+  void UpdateVTKAttributes(Grid& grid, Attributes& attributes,
+    vtkCPInputDataDescription* idd, const char* fieldName)
   {
-    if (idd->IsFieldNeeded("U", vtkDataObject::CELL))
+    if (idd->IsFieldNeeded(fieldName, vtkDataObject::CELL))
     {
       if (vtkGrid->GetCellData()->GetNumberOfArrays() == 0)
       {
         // velocity X array
-        vtkNew<vtkDoubleArray> velocity_x;
-        velocity_x->SetName("U");
-        velocity_x->SetNumberOfComponents(1);
-        vtkGrid->GetCellData()->AddArray(velocity_x.GetPointer());
+        vtkSmartPointer<vtkDoubleArray> velocity = vtkSmartPointer<vtkDoubleArray>::New();
+        velocity->SetName(fieldName);
+        velocity->SetNumberOfComponents(1);
+        vtkGrid->GetCellData()->AddArray(velocity.GetPointer());
       }
-      vtkDoubleArray* velocity_x =
-        vtkDoubleArray::SafeDownCast(vtkGrid->GetCellData()->GetArray("U"));
-      double* uxData = attributes.GetUArray();
-      velocity_x->SetArray(uxData, vtkGrid->GetNumberOfCells(), 1);
+      vtkSmartPointer<vtkDoubleArray> velocity =
+        vtkDoubleArray::SafeDownCast(vtkGrid->GetCellData()->GetArray(fieldName));
+      if ((strcmp(fieldName, "U") == 0)){
+        velocity->SetArray(attributes.GetUArray(), vtkGrid->GetNumberOfCells(), 1);
+      }
     }
 
     // Convert from cell to point data to allow contour visualization
@@ -77,20 +79,14 @@ namespace
     cellToPoint->SetInputData(vtkGrid);
     cellToPoint->Update();
 
-    vtkPointData* pointData = cellToPoint->GetOutput()->GetPointData();
+    vtkSmartPointer<vtkPointData> pointData = cellToPoint->GetOutput()->GetPointData();
 
-    vtkSmartPointer<vtkDoubleArray> velocity_x_cellToPoint =
-      vtkArrayDownCast<vtkDoubleArray>(cellToPoint->GetOutput()->GetPointData()->GetAbstractArray("U"));
+    vtkSmartPointer<vtkDoubleArray> velocity_cellToPoint =
+      vtkArrayDownCast<vtkDoubleArray>(cellToPoint->GetOutput()->GetPointData()->GetAbstractArray(fieldName));
 
-    if (idd->IsFieldNeeded("U", vtkDataObject::POINT)){
-      vtkGrid->GetPointData()->AddArray(velocity_x_cellToPoint);
+    if (idd->IsFieldNeeded(fieldName, vtkDataObject::POINT)){
+      vtkGrid->GetPointData()->AddArray(velocity_cellToPoint);
     }
-  }
-
-  void GetGridInfo(vtkCPInputDataDescription* idd){
-    vtkUnstructuredGrid* iddGrid = vtkUnstructuredGrid::SafeDownCast(idd->GetGrid());
-    // std::cout << "Total number of cells formed in IDDVTKGrid : "
-    //   << iddGrid->GetNumberOfCells() << "\n";
   }
 
   void BuildVTKDataStructures(Grid& grid, Attributes& attributes,
@@ -102,8 +98,8 @@ namespace
       vtkGrid = vtkUnstructuredGrid::New();
       BuildVTKGrid(grid);
     }
-    // GetGridInfo(idd);
-    // UpdateVTKAttributes(grid, attributes, idd);
+    const char* ux_field = "U";
+    UpdateVTKAttributes(grid, attributes, idd, ux_field);
   }
 }
 
@@ -121,7 +117,6 @@ namespace FEAdaptor
     }
     vtkNew<vtkCPVTKPipeline> pipeline;
 
-    // TODO: Initialize pipeline
     pipeline->Initialize(outputFrequency);
     Processor->AddPipeline(pipeline.GetPointer());
   }
@@ -147,11 +142,7 @@ namespace FEAdaptor
   void CoProcess(Grid& grid, Attributes& attributes, double time)
   {
     vtkCPDataDescription* dataDescription = vtkCPDataDescription::New();
-    // int step = *timeStep;
     std::cout << "Coprocessing..." << "\n";
-    // if (dataDescription == NULL){
-    //   dataDescription = vtkCPDataDescription::New();
-    // }
     dataDescription->AddInput("input");
     dataDescription->SetTimeData(time, timeStep);
     std::cout << "Time: " << time << ", timeStep: " << timeStep << "\n";
@@ -173,7 +164,5 @@ namespace FEAdaptor
     }
 
     timeStep++;
-
-    dataDescription->Delete();
   }
 }
