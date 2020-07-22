@@ -38,9 +38,9 @@ namespace
     vtkGrid->SetPoints(points.GetPointer());
 
     // Create cell in vtkUnstructuredGrid
-    int numCells = grid.GetNumberOfCells();
-    vtkGrid->Allocate(static_cast<vtkIdType>(numCells * 8));
-    for(int cell = 0; cell < numCells; cell++)
+    // int numCells = grid.GetNumberOfCells();
+    vtkGrid->Allocate(static_cast<vtkIdType>(grid.GetNumberOfCells() * 8));
+    for(int cell = 0; cell < grid.GetNumberOfCells(); cell++)
     {
       unsigned int* cellPoints = grid.GetCellPoints(cell);
       vtkIdType tmp[8] = {cellPoints[0], cellPoints[1], cellPoints[2],
@@ -119,12 +119,6 @@ namespace FEAdaptor
 
     pipeline->Initialize(outputFrequency);
     Processor->AddPipeline(pipeline.GetPointer());
-  }
-
-  void BuildGrid(Grid& grid)
-  {
-    vtkGrid = vtkUnstructuredGrid::New();
-    BuildVTKGrid(grid);
   }
 
   void Finalize()

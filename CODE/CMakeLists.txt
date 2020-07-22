@@ -64,6 +64,7 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
     ${MPI_Fortran_LIBRARIES}  ParMetis Metis TecIo -no-pie
     # ParaView::PythonCatalyst
     VTK::CommonDataModel
+    VTK::CommonCore
     VTK::IOLegacy
     VTK::FiltersCore
     ${BLASLIBS} openblas
@@ -82,6 +83,10 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
       VTK::IOImage
       VTK::ViewsInfovis
       VTK::RenderingAnnotation
+      VTK::RenderingVolume
+      VTK::RenderingCore
+      VTK::FiltersGeometry
+      VTK::CommonColor
     )
   endif ()
 

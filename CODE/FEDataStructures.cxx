@@ -88,11 +88,12 @@ void Attributes::Initialize(Grid* grid)
 
 void Attributes::UpdateFields(double* scalars, Variable var)
 {
-  int cellCount = GridPtr->GetNumberOfCells();
+  // Clear vector arrays before updating to ensure no memory leak
   switch (var) {
     case DENSITY:
       {
-        for (int i = 0; i < cellCount; i++)
+        Rho.clear();
+        for (int i = 0; i < GridPtr->GetNumberOfCells(); i++)
         {
           Rho.insert(Rho.begin()+i, *(scalars + i));
         }
@@ -105,9 +106,10 @@ void Attributes::UpdateFields(double* scalars, Variable var)
           if (Rho.empty()) {
             throw 'a';
           } else {
-            for (int i = 0; i < cellCount; i++){
-              double rho = Rho.at(i);
-              U.insert(U.begin()+i, *(scalars + i)/rho);
+            U.clear();
+            for (int i = 0; i < GridPtr->GetNumberOfCells(); i++){
+              // double rho = Rho.at(i);
+              U.insert(U.begin()+i, *(scalars + i));
             }
           }
         } catch (...) {
@@ -122,7 +124,8 @@ void Attributes::UpdateFields(double* scalars, Variable var)
           if (Rho.empty()) {
             throw 'a';
           } else {
-            for (int i = 0; i < cellCount; i++){
+            V.clear();
+            for (int i = 0; i < GridPtr->GetNumberOfCells(); i++){
               double rho = Rho.at(i);
               V.insert(V.begin()+i, *(scalars + i)/rho);
             }
@@ -139,7 +142,8 @@ void Attributes::UpdateFields(double* scalars, Variable var)
           if (Rho.empty()) {
             throw 'a';
           } else {
-            for (int i = 0; i < cellCount; i++){
+            W.clear();
+            for (int i = 0; i < GridPtr->GetNumberOfCells(); i++){
               double rho = Rho.at(i);
               W.insert(W.begin()+i, *(scalars + i)/rho);
             }

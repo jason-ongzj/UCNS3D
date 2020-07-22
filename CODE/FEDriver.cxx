@@ -47,7 +47,10 @@ namespace
     double* rho = attributes.GetRhoArray();
     // int count = 0;
     std::cout << "Density: " << *(rho + 1) << "\n";
-    // delete rho;
+
+    // Release rho pointer memory
+    rho = NULL;
+    delete rho;
   }
 
   extern "C" void scalarsfunction_(double* scalars, int* scalarDimension)
@@ -75,9 +78,15 @@ namespace
         }
         break;
     }
-    // delete velocity_x;
-    // delete velocity_y;
-    // delete velocity_z;
+    
+    // Release memory for velocity pointers
+    velocity_x = NULL;
+    velocity_y = NULL;
+    velocity_z = NULL;
+
+    delete velocity_x;
+    delete velocity_y;
+    delete velocity_z;
   }
 
   extern "C" void coprocessor_initialize_(int* outputFrequency)
