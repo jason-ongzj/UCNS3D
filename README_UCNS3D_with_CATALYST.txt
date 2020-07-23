@@ -247,7 +247,7 @@ vglrun paraview
 // 7. For testing with Catalyst examples in Paraview directory,
 cmake -DCMAKE_PREFIX_PATH="/home/jason/Desktop/pv_5.8/" \
 	-DCMAKE_BUILD_TYPE:STRING=Release \
-	-DBUILD_FORTRAN_EXAMPLES:STRING=ON \
+	-DBUILD_FORTRAN_EXAMPLES:STRING=OFF \
 	-DBUILD_TESTING:BOOL=ON \
 	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../
 
@@ -272,8 +272,6 @@ cmake -DCMAKE_PREFIX_PATH="/home/jason/Desktop/pv_5.8_catalyst-rendering_nopy/" 
 	-DCMAKE_BUILD_TYPE:STRING=Release \
 	-DBUILD_TESTING:BOOL=ON \
 	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../
-
-
 
 --------------------------------------------------------------------------
 INTEGRATION STEPS:

@@ -87,6 +87,9 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
       VTK::RenderingCore
       VTK::FiltersGeometry
       VTK::CommonColor
+      VTK::ParallelMPI
+      VTK::ParallelCore
+      VTK::RenderingParallel
     )
   endif ()
 

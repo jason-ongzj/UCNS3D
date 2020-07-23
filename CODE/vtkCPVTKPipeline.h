@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vtkCPPipeline.h>
+#include <vtkMultiProcessController.h>
 
 class vtkCPDataDescription;
 

@@ -30,6 +30,11 @@
 #include <vtkNamedColors.h>
 #include <vtkWindowToImageFilter.h>
 
+#include <vtkMPIController.h>
+#include <vtkMultiProcessController.h>
+#include <vtkCompositeRenderManager.h>
+#include <vtkRenderWindowInteractor.h>
+
 #include <array>
 
 vtkStandardNewMacro(vtkCPVTKPipeline);
@@ -75,13 +80,13 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     vtkWarningMacro("DataDescription is NULL");
     return 0;
   }
+
   vtkUnstructuredGrid* grid = vtkUnstructuredGrid::SafeDownCast(
     dataDescription->GetInputDescriptionByName("input")->GetGrid());
 
   if (grid == NULL)
   {
-    vtkWarningMacro("DataDescription is missing input unstructured grid.");
-    return 0;
+    std::cout << "DataDescription is missing input unstructured grid.\n";
   }
 
   if (this->RequestDataDescription(dataDescription) == 0)
@@ -89,20 +94,12 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     return 1;
   }
 
+  vtkMultiProcessController* controller = vtkMultiProcessController::GetGlobalController();
+  int myId = controller->GetLocalProcessId();
+  int numProcs = controller->GetNumberOfProcesses();
+
   std::cout << "Current timestep: " << dataDescription->GetTimeStep() << endl;
-
-  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-  vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-  vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
-
-  camera->SetPosition(35.82379571216059, -3.9871568578962098, 329.7784155802543);
-  camera->SetFocalPoint(35.82379571216059, -3.9871568578962098, 9.869604110717773);
-  // camera->SetViewUp(0.21276442893019504, 0.8819412362199431, -0.4206078382969658);
-  camera->SetFocalDisk(1.0);
-  camera->Zoom(1.0);
-
-  renderWindow->SetSize(1256, 799);
-  renderWindow->SetStereoTypeToCrystalEyes();
+  std::cout << "LocalProcessID: " << myId << endl;
 
   std::string ext = ".png";
   auto imgwriter = vtkSmartPointer<vtkImageWriter>::New();
@@ -112,18 +109,18 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     imgwriter = vtkSmartPointer<vtkPNGWriter>::New();
   }
 
-  vtkSmartPointer<vtkCellDataToPointData> cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
-  cellToPoint->SetInputData(grid);
-  cellToPoint->Update();
+  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+  vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
 
-  std::string fieldName = "U";
+  renderWindow->SetSize(1256, 799);
+  renderWindow->SetStereoTypeToCrystalEyes();
 
-  vtkSmartPointer<vtkPointData> pointData = cellToPoint->GetOutput()->GetPointData();
-  vtkSmartPointer<vtkDoubleArray> scalarRU = vtkArrayDownCast<vtkDoubleArray> (pointData->GetAbstractArray(fieldName.c_str()));
+  vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+  camera->SetPosition(35.82379571216059, -3.9871568578962098, 329.7784155802543);
+  camera->SetFocalPoint(35.82379571216059, -3.9871568578962098, 9.869604110717773);
+  camera->SetFocalDisk(1.0);
+  camera->Zoom(1.0);
 
-  double* scalarRU_ptr = scalarRU->GetPointer(0);
-
-  std::cout << "scalarRU output: " << *scalarRU_ptr << "\n";
   std::cout << "UnstructuredGrid number of cells: " << grid->GetNumberOfCells() << "\n";
   vtkSmartPointer<vtkGeometryFilter> geometryFilter = vtkSmartPointer<vtkGeometryFilter>::New();
 
@@ -144,25 +141,46 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   colors->SetColor("BkgColor", bkg.data());
   actor->GetProperty()->SetColor(colors->GetColor3d("Yellow").GetData());
 
+  renderWindow->AddRenderer(renderer);
   renderer->AddActor(actor);
   renderer->SetActiveCamera(camera);
-  renderWindow->AddRenderer(renderer);
 
-  renderWindow->Render();
+  vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::New();
+  iren->SetRenderWindow(renderWindow);
 
-  vtkSmartPointer<vtkWindowToImageFilter> window_to_image_filter = vtkSmartPointer<vtkWindowToImageFilter>::New();
-  window_to_image_filter->SetInput(renderWindow);
-  window_to_image_filter->SetScale(1);
-  window_to_image_filter->SetInputBufferTypeToRGB();
-  window_to_image_filter->Update();
-  //
-  std::string fileName = "filename_";
-  fileName += std::to_string(dataDescription->GetTimeStep());
-  fileName += ext;
+  // Key lines
+  vtkCompositeRenderManager* tc = vtkCompositeRenderManager::New();
+  tc->SetRenderWindow(renderWindow);
+  // tc->RenderRMI();
 
-  imgwriter->SetFileName(fileName.c_str());
-  imgwriter->SetInputConnection(window_to_image_filter->GetOutputPort());
-  imgwriter->Write();
+  tc->StartInteractor();
+  // tc->StartRender();
+
+  // controller->SetSingleMethod(process(dataDescription), p);
+
+  // renderWindow->Render();
+
+  if (myId == 0){
+    tc->GetRenderWindow()->Render();
+    vtkSmartPointer<vtkWindowToImageFilter> window_to_image_filter = vtkSmartPointer<vtkWindowToImageFilter>::New();
+    window_to_image_filter->SetInput(tc->GetRenderWindow());
+    window_to_image_filter->SetScale(1);
+    window_to_image_filter->SetInputBufferTypeToRGB();
+    window_to_image_filter->Update();
+    //
+    std::string fileName = "filename_";
+    fileName += std::to_string(dataDescription->GetTimeStep());
+    fileName += ext;
+
+    imgwriter->SetFileName(fileName.c_str());
+    imgwriter->SetInputConnection(window_to_image_filter->GetOutputPort());
+    imgwriter->Write();
+  }
+
+  std::cout << "myId passed: " << myId << "\n";
+
+  controller->Barrier();
 
   grid->Delete();
+
 }
