@@ -38,7 +38,6 @@ namespace
     vtkGrid->SetPoints(points.GetPointer());
 
     // Create cell in vtkUnstructuredGrid
-    // int numCells = grid.GetNumberOfCells();
     vtkGrid->Allocate(static_cast<vtkIdType>(grid.GetNumberOfCells() * 8));
     for(int cell = 0; cell < grid.GetNumberOfCells(); cell++)
     {

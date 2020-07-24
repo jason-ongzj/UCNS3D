@@ -55,8 +55,6 @@ void vtkCPVTKPipeline::Initialize(int outputFrequency)
 
 int vtkCPVTKPipeline::RequestDataDescription(vtkCPDataDescription* dataDescription)
 {
-  // std::cout << "RequestDataDescription: " << dataDescription->GetTimeStep() % this->OutputFrequency << "\n";
-
   if (!dataDescription)
   {
     vtkWarningMacro("dataDescription is NULL.");
@@ -94,6 +92,8 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     return 1;
   }
 
+  // MPI process has been initialized in Fortran simulation code, so we don't
+  // have to initialize a new vtkMultiProcessController object.
   vtkMultiProcessController* controller = vtkMultiProcessController::GetGlobalController();
   int myId = controller->GetLocalProcessId();
   int numProcs = controller->GetNumberOfProcesses();
@@ -109,65 +109,70 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     imgwriter = vtkSmartPointer<vtkPNGWriter>::New();
   }
 
-  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-  vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+  vtkRenderer* renderer = vtkRenderer::New();
+  vtkRenderWindow* renderWindow = vtkRenderWindow::New();
 
   renderWindow->SetSize(1256, 799);
   renderWindow->SetStereoTypeToCrystalEyes();
 
-  vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+  vtkCamera* camera = vtkCamera::New();
   camera->SetPosition(35.82379571216059, -3.9871568578962098, 329.7784155802543);
   camera->SetFocalPoint(35.82379571216059, -3.9871568578962098, 9.869604110717773);
   camera->SetFocalDisk(1.0);
   camera->Zoom(1.0);
 
-  std::cout << "UnstructuredGrid number of cells: " << grid->GetNumberOfCells() << "\n";
-  vtkSmartPointer<vtkGeometryFilter> geometryFilter = vtkSmartPointer<vtkGeometryFilter>::New();
+  std::cout << "UnstructuredGrid number of cells: " <<
+      grid->GetNumberOfCells() << "\n";
 
+  // Data copy from vtkUnstructuredGrid to vtkPolyData. To be freed later so as
+  // to prevent memory leak.
+  vtkGeometryFilter* geometryFilter = vtkGeometryFilter::New();
   geometryFilter->SetInputData(grid);
   geometryFilter->Update();
 
-  vtkSmartPointer<vtkPolyDataMapper> polyDataMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  vtkPolyDataMapper* polyDataMapper = vtkPolyDataMapper::New();
   polyDataMapper->SetInputData(geometryFilter->GetOutput());
   polyDataMapper->Update();
 
-  std::cout << "PolyData number of cells: " << polyDataMapper->GetInput()->GetNumberOfCells() << "\n";
+  std::cout << "PolyData number of cells: " <<
+      polyDataMapper->GetInput()->GetNumberOfCells() << "\n";
 
-  vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+  vtkActor* actor = vtkActor::New();
   actor->SetMapper(polyDataMapper);
 
-  auto colors = vtkSmartPointer<vtkNamedColors>::New();
+  auto colors = vtkNamedColors::New();
   std::array<unsigned char, 4> bkg{{26, 51, 102, 255}};
   colors->SetColor("BkgColor", bkg.data());
   actor->GetProperty()->SetColor(colors->GetColor3d("Yellow").GetData());
+
+  // Disable this line to show render window
+  renderWindow->ShowWindowOff();
 
   renderWindow->AddRenderer(renderer);
   renderer->AddActor(actor);
   renderer->SetActiveCamera(camera);
 
-  vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::New();
-  iren->SetRenderWindow(renderWindow);
+  // Parallel rendering section for construction of postprocessed image
+  vtkCompositeRenderManager* compositeRenderManager =
+    vtkCompositeRenderManager::New();
+  compositeRenderManager->SetRenderWindow(renderWindow);
 
-  // Key lines
-  vtkCompositeRenderManager* tc = vtkCompositeRenderManager::New();
-  tc->SetRenderWindow(renderWindow);
-  // tc->RenderRMI();
+  // Disable this line to show onscreen render windows for non-root nodes
+  compositeRenderManager->InitializeOffScreen();
 
-  tc->StartInteractor();
-  // tc->StartRender();
-
-  // controller->SetSingleMethod(process(dataDescription), p);
-
-  // renderWindow->Render();
+  if(myId != 0){
+    // Call for parallel rendering requests from other nodes
+    compositeRenderManager ->StartServices();
+  }
 
   if (myId == 0){
-    tc->GetRenderWindow()->Render();
-    vtkSmartPointer<vtkWindowToImageFilter> window_to_image_filter = vtkSmartPointer<vtkWindowToImageFilter>::New();
-    window_to_image_filter->SetInput(tc->GetRenderWindow());
+    compositeRenderManager->GetRenderWindow()->Render();
+    vtkWindowToImageFilter* window_to_image_filter = vtkWindowToImageFilter::New();
+    window_to_image_filter->SetInput(compositeRenderManager->GetRenderWindow());
     window_to_image_filter->SetScale(1);
     window_to_image_filter->SetInputBufferTypeToRGB();
     window_to_image_filter->Update();
-    //
+
     std::string fileName = "filename_";
     fileName += std::to_string(dataDescription->GetTimeStep());
     fileName += ext;
@@ -175,12 +180,26 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     imgwriter->SetFileName(fileName.c_str());
     imgwriter->SetInputConnection(window_to_image_filter->GetOutputPort());
     imgwriter->Write();
+
+    compositeRenderManager->GetRenderWindow()->Finalize();
+    window_to_image_filter->Delete();
+
+    compositeRenderManager ->StopServices();
   }
 
   std::cout << "myId passed: " << myId << "\n";
 
   controller->Barrier();
 
+  // Manual deletion of object pointers to ensure memory is freed. This includes
+  // using normal pointer notation rather than using vtkSmartPointer.
   grid->Delete();
-
+  geometryFilter->Delete();
+  polyDataMapper->Delete();
+  actor->Delete();
+  renderer->Delete();
+  renderWindow->Delete();
+  camera->Delete();
+  colors->Delete();
+  compositeRenderManager->Delete();
 }

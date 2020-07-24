@@ -30,14 +30,16 @@ namespace
 
   // For conversion of C++ to Fortran functions, function names have to be
   // non-captialized since Fortran subroutines are case-insensitive.
-  extern "C" void gridfunction_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank)
+  extern "C" void gridfunction_(double pointSet[][3], int* pointSetSize,
+      int vtkCellId[][8], int* vtkCellIdSetSize, int* rank)
   {
     if (attributes.GetGrid() == NULL){
       grid.Initialize(pointSet, pointSetSize, vtkCellId, vtkCellIdSetSize);
       attributes.Initialize(&grid);
-      std::cout << "Rank " << *rank << ": Checking size of pointSet in Grid object: " << grid.GetNumberOfPoints() << "\n";
-      std::cout << "Rank " << *rank << ": Checking number of cells in Grid object: " << grid.GetNumberOfCells() << "\n";
-      // FEAdaptor::BuildGrid(grid);
+      std::cout << "Rank " << *rank << ": Checking size of pointSet in Grid object: "
+        << grid.GetNumberOfPoints() << "\n";
+      std::cout << "Rank " << *rank << ": Checking number of cells in Grid object: "
+        << grid.GetNumberOfCells() << "\n";
     }
   }
 
@@ -45,7 +47,6 @@ namespace
   {
     attributes.UpdateFields(scalars, DENSITY);
     double* rho = attributes.GetRhoArray();
-    // int count = 0;
     std::cout << "Density: " << *(rho + 1) << "\n";
 
     // Release rho pointer memory
@@ -78,7 +79,7 @@ namespace
         }
         break;
     }
-    
+
     // Release memory for velocity pointers
     velocity_x = NULL;
     velocity_y = NULL;
