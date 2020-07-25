@@ -34,6 +34,7 @@
 #include <vtkMultiProcessController.h>
 #include <vtkCompositeRenderManager.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkPolyDataNormals.h>
 
 #include <array>
 
@@ -109,6 +110,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     imgwriter = vtkSmartPointer<vtkPNGWriter>::New();
   }
 
+
   vtkRenderer* renderer = vtkRenderer::New();
   vtkRenderWindow* renderWindow = vtkRenderWindow::New();
 
@@ -128,10 +130,15 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   // to prevent memory leak.
   vtkGeometryFilter* geometryFilter = vtkGeometryFilter::New();
   geometryFilter->SetInputData(grid);
+  geometryFilter->MergingOff();
   geometryFilter->Update();
 
   vtkPolyDataMapper* polyDataMapper = vtkPolyDataMapper::New();
   polyDataMapper->SetInputData(geometryFilter->GetOutput());
+  polyDataMapper->ScalarVisibilityOn();
+  polyDataMapper->SetScalarRange(0, 0.5);
+  polyDataMapper->SetScalarModeToUsePointFieldData();
+  polyDataMapper->ColorByArrayComponent("U", 0);
   polyDataMapper->Update();
 
   std::cout << "PolyData number of cells: " <<
@@ -195,6 +202,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   // using normal pointer notation rather than using vtkSmartPointer.
   grid->Delete();
   geometryFilter->Delete();
+  // normals->Delete();
   polyDataMapper->Delete();
   actor->Delete();
   renderer->Delete();
