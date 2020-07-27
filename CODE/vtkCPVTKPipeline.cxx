@@ -12,7 +12,6 @@
 #include <vtkJPEGWriter.h>
 #include <vtkPNGWriter.h>
 #include <vtkNew.h>
-#include <vtkPVTrivialProducer.h>
 #include <vtkCellDataToPointData.h>
 #include <vtkPointData.h>
 #include <vtkAbstractArray.h>
@@ -22,19 +21,17 @@
 #include <vtkScalarsToColors.h>
 #include <vtkLookupTable.h>
 #include <vtkScalarBarActor.h>
-#include <vtkContourFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkGeometryFilter.h>
 #include <vtkActor.h>
 #include <vtkProperty.h>
-#include <vtkNamedColors.h>
 #include <vtkWindowToImageFilter.h>
-
-#include <vtkMPIController.h>
 #include <vtkMultiProcessController.h>
 #include <vtkCompositeRenderManager.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkPolyDataNormals.h>
+#include <vtkTextProperty.h>
+#include <vtkTextMapper.h>
+#include <vtkTextActor.h>
+#include <vtkNamedColors.h>
 
 #include <array>
 
@@ -110,7 +107,6 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     imgwriter = vtkSmartPointer<vtkPNGWriter>::New();
   }
 
-
   vtkRenderer* renderer = vtkRenderer::New();
   vtkRenderWindow* renderWindow = vtkRenderWindow::New();
 
@@ -133,10 +129,52 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   geometryFilter->MergingOff();
   geometryFilter->Update();
 
+  vtkTextProperty* text_property = vtkTextProperty::New();
+  text_property->SetJustificationToCentered();
+  text_property->SetVerticalJustificationToBottom();
+  text_property->SetFontSize(0);
+  text_property->BoldOff();
+
+  vtkSmartPointer<vtkNamedColors> colors = vtkSmartPointer<vtkNamedColors>::New();
+
+  vtkSmartPointer<vtkTextActor> title = vtkSmartPointer<vtkTextActor>::New();
+  title->SetInput("UCNS3D-Catalyst");
+  title->SetDisplayPosition(20, 750);
+  vtkTextProperty *txtprop = title->GetTextProperty();
+  txtprop->BoldOn();
+  txtprop->SetFontSize(36);
+  txtprop->ShadowOn();
+  txtprop->SetShadowOffset(4, 4);
+  txtprop->SetColor(colors->GetColor3d("White").GetData());
+  // txtprop->SetDisplayPosition(20, 30);
+
+  vtkLookupTable* rainbowBlueRedLut = vtkLookupTable::New();
+  rainbowBlueRedLut->SetNumberOfColors(256);
+  rainbowBlueRedLut->SetHueRange(0.667, 0.0);
+  rainbowBlueRedLut->Build();
+
+  vtkScalarBarActor* scalarBar = vtkScalarBarActor::New();
+  scalarBar->SetLookupTable(rainbowBlueRedLut);
+  // scalarBar->SetOrientationToVertical();
+  scalarBar->SetLabelTextProperty(text_property);
+  scalarBar->SetOrientationToHorizontal();
+  // scalarBar->SetTitle("U");
+  // scalarBar->SetBarRatio(0.25);
+  scalarBar->DrawTickLabelsOn();
+  scalarBar->SetTextPositionToPrecedeScalarBar();
+  scalarBar->SetTextPad(8); // Padding also controls the text size
+  scalarBar->SetWidth(0.8);
+  scalarBar->SetHeight(0.1);
+  scalarBar->SetPosition(0.1, 0.05);
+
+  std::cout << "scalarBar position: " << scalarBar->GetPosition()[0] <<
+    ", " << scalarBar->GetPosition()[1] << "\n";
+
   vtkPolyDataMapper* polyDataMapper = vtkPolyDataMapper::New();
   polyDataMapper->SetInputData(geometryFilter->GetOutput());
   polyDataMapper->ScalarVisibilityOn();
-  polyDataMapper->SetScalarRange(0, 0.5);
+  polyDataMapper->SetLookupTable(rainbowBlueRedLut);
+  polyDataMapper->SetScalarRange(0, 1);
   polyDataMapper->SetScalarModeToUsePointFieldData();
   polyDataMapper->ColorByArrayComponent("U", 0);
   polyDataMapper->Update();
@@ -147,16 +185,13 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   vtkActor* actor = vtkActor::New();
   actor->SetMapper(polyDataMapper);
 
-  auto colors = vtkNamedColors::New();
-  std::array<unsigned char, 4> bkg{{26, 51, 102, 255}};
-  colors->SetColor("BkgColor", bkg.data());
-  actor->GetProperty()->SetColor(colors->GetColor3d("Yellow").GetData());
-
   // Disable this line to show render window
   renderWindow->ShowWindowOff();
 
   renderWindow->AddRenderer(renderer);
   renderer->AddActor(actor);
+  renderer->AddActor(scalarBar);
+  renderer->AddActor(title);
   renderer->SetActiveCamera(camera);
 
   // Parallel rendering section for construction of postprocessed image
@@ -200,14 +235,16 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
 
   // Manual deletion of object pointers to ensure memory is freed. This includes
   // using normal pointer notation rather than using vtkSmartPointer.
+
   grid->Delete();
-  geometryFilter->Delete();
-  // normals->Delete();
-  polyDataMapper->Delete();
-  actor->Delete();
   renderer->Delete();
   renderWindow->Delete();
   camera->Delete();
-  colors->Delete();
+  geometryFilter->Delete();
+  text_property->Delete();
+  rainbowBlueRedLut->Delete();
+  scalarBar->Delete();
+  polyDataMapper->Delete();
+  actor->Delete();
   compositeRenderManager->Delete();
 }

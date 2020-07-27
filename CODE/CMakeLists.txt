@@ -34,7 +34,6 @@ add_executable(ucns3d_p
   der_r.f90
   svd.f90
   local_pt.f90
-  # FEFortranAdaptor.f90
   main.f90
   libparmetis.a
   libmetis.a
