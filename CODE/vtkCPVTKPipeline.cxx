@@ -32,8 +32,11 @@
 #include <vtkTextMapper.h>
 #include <vtkTextActor.h>
 #include <vtkNamedColors.h>
+#include <vtkThreshold.h>
+#include <vtkDataObject.h>
 
 #include <array>
+#include <string>
 
 vtkStandardNewMacro(vtkCPVTKPipeline);
 
@@ -110,22 +113,23 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   vtkRenderer* renderer = vtkRenderer::New();
   vtkRenderWindow* renderWindow = vtkRenderWindow::New();
 
-  renderWindow->SetSize(1256, 799);
   renderWindow->SetStereoTypeToCrystalEyes();
 
   vtkCamera* camera = vtkCamera::New();
-  camera->SetPosition(35.82379571216059, -3.9871568578962098, 329.7784155802543);
-  camera->SetFocalPoint(35.82379571216059, -3.9871568578962098, 9.869604110717773);
-  camera->SetFocalDisk(1.0);
-  camera->Zoom(1.0);
 
   std::cout << "UnstructuredGrid number of cells: " <<
       grid->GetNumberOfCells() << "\n";
 
+  vtkThreshold* threshold = vtkThreshold::New();
+  threshold->SetInputData(grid);
+  threshold->ThresholdBetween(0.1, 0.5);
+  threshold->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_CELLS, "Q");
+  threshold->Update();
+
   // Data copy from vtkUnstructuredGrid to vtkPolyData. To be freed later so as
   // to prevent memory leak.
   vtkGeometryFilter* geometryFilter = vtkGeometryFilter::New();
-  geometryFilter->SetInputData(grid);
+  geometryFilter->SetInputData(threshold->GetOutput());
   geometryFilter->MergingOff();
   geometryFilter->Update();
 
@@ -137,16 +141,40 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
 
   vtkSmartPointer<vtkNamedColors> colors = vtkSmartPointer<vtkNamedColors>::New();
 
-  vtkSmartPointer<vtkTextActor> title = vtkSmartPointer<vtkTextActor>::New();
+  vtkTextActor* title = vtkTextActor::New();
   title->SetInput("UCNS3D-Catalyst");
-  title->SetDisplayPosition(20, 750);
-  vtkTextProperty *txtprop = title->GetTextProperty();
-  txtprop->BoldOn();
-  txtprop->SetFontSize(36);
-  txtprop->ShadowOn();
-  txtprop->SetShadowOffset(4, 4);
-  txtprop->SetColor(colors->GetColor3d("White").GetData());
-  // txtprop->SetDisplayPosition(20, 30);
+
+  vtkTextProperty* title_txtprop = title->GetTextProperty();
+  title_txtprop->BoldOn();
+  title_txtprop->ShadowOn();
+  title_txtprop->SetShadowOffset(4, 4);
+  title_txtprop->SetColor(colors->GetColor3d("White").GetData());
+
+  vtkTextActor* quantity = vtkTextActor::New();
+  quantity->SetInput("Q-Criterion");
+  quantity->SetDisplayPosition(400, 10);
+  vtkTextProperty *quantity_txtprop = quantity->GetTextProperty();
+  quantity_txtprop->BoldOn();
+  quantity_txtprop->ShadowOn();
+  quantity_txtprop->SetColor(colors->GetColor3d("White").GetData());
+
+  std::string time_input = "Time: ";
+  time_input += std::to_string(dataDescription->GetTime());
+  time_input += " s";
+
+  char input[time_input.length() + 1];
+  for (int x = 0; x < sizeof(input); x++) {
+      input[x] = time_input[x];
+  }
+  const char* input_string = input;
+
+  vtkTextActor* time = vtkTextActor::New();
+  time->SetInput(input_string);
+
+  vtkTextProperty *time_txtprop = time->GetTextProperty();
+  time_txtprop->BoldOn();
+  time_txtprop->ShadowOn();
+  time_txtprop->SetColor(colors->GetColor3d("White").GetData());
 
   vtkLookupTable* rainbowBlueRedLut = vtkLookupTable::New();
   rainbowBlueRedLut->SetNumberOfColors(256);
@@ -155,17 +183,42 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
 
   vtkScalarBarActor* scalarBar = vtkScalarBarActor::New();
   scalarBar->SetLookupTable(rainbowBlueRedLut);
-  // scalarBar->SetOrientationToVertical();
   scalarBar->SetLabelTextProperty(text_property);
   scalarBar->SetOrientationToHorizontal();
-  // scalarBar->SetTitle("U");
-  // scalarBar->SetBarRatio(0.25);
   scalarBar->DrawTickLabelsOn();
   scalarBar->SetTextPositionToPrecedeScalarBar();
-  scalarBar->SetTextPad(8); // Padding also controls the text size
   scalarBar->SetWidth(0.8);
   scalarBar->SetHeight(0.1);
   scalarBar->SetPosition(0.1, 0.05);
+
+  // Geometry-specific settings
+  // -------------------------------------------------------------------------
+  // TGV-Coarse
+  camera->SetPosition(-6.962290992619889, 13.00713402789492, 18.716862694358497);
+  camera->SetFocalPoint(3.141592741012574, 3.1415927410125715, 3.1415927410125755);
+  camera->SetViewUp(0.21276442893019504, 0.8819412362199431, -0.4206078382969658);
+  camera->SetParallelScale(5.44139824412335);
+  renderWindow->SetSize(900,520);
+  scalarBar->SetTextPad(5); // Padding also controls the text size
+  title->SetDisplayPosition(40, 480);
+  title_txtprop->SetFontSize(24);
+  quantity->SetDisplayPosition(390, 8);
+  quantity_txtprop->SetFontSize(18);
+  time->SetDisplayPosition(660, 100);
+  time_txtprop->SetFontSize(18);
+
+  // Transonic Cylinder
+  // camera->SetPosition(35.82379571216059, -3.9871568578962098, 329.7784155802543);
+  // camera->SetFocalPoint(35.82379571216059, -3.9871568578962098, 9.869604110717773);
+  // camera->SetFocalDisk(1.0);
+  // camera->Zoom(1.0);
+  // renderWindow->SetSize(1256, 799);
+  // scalarBar->SetTextPad(8);
+  // title_txtprop->SetFontSize(36);
+  // title->SetDisplayPosition(20, 750);
+  // quantity->SetDisplayPosition(578, 10);
+  // quantity_txtprop->SetFontSize(24);
+  // -------------------------------------------------------------------------
 
   std::cout << "scalarBar position: " << scalarBar->GetPosition()[0] <<
     ", " << scalarBar->GetPosition()[1] << "\n";
@@ -174,9 +227,9 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   polyDataMapper->SetInputData(geometryFilter->GetOutput());
   polyDataMapper->ScalarVisibilityOn();
   polyDataMapper->SetLookupTable(rainbowBlueRedLut);
-  polyDataMapper->SetScalarRange(0, 1);
+  polyDataMapper->SetScalarRange(0.1, 0.5);
   polyDataMapper->SetScalarModeToUsePointFieldData();
-  polyDataMapper->ColorByArrayComponent("U", 0);
+  polyDataMapper->ColorByArrayComponent("Q", 0);
   polyDataMapper->Update();
 
   std::cout << "PolyData number of cells: " <<
@@ -192,6 +245,8 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   renderer->AddActor(actor);
   renderer->AddActor(scalarBar);
   renderer->AddActor(title);
+  renderer->AddActor(quantity);
+  renderer->AddActor(time);
   renderer->SetActiveCamera(camera);
 
   // Parallel rendering section for construction of postprocessed image
@@ -241,7 +296,9 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   renderWindow->Delete();
   camera->Delete();
   geometryFilter->Delete();
+  threshold->Delete();
   text_property->Delete();
+  quantity->Delete();
   rainbowBlueRedLut->Delete();
   scalarBar->Delete();
   polyDataMapper->Delete();

@@ -60,15 +60,17 @@ namespace
       if (vtkGrid->GetCellData()->GetNumberOfArrays() == 0)
       {
         // velocity X array
-        vtkSmartPointer<vtkDoubleArray> velocity = vtkSmartPointer<vtkDoubleArray>::New();
-        velocity->SetName(fieldName);
-        velocity->SetNumberOfComponents(1);
-        vtkGrid->GetCellData()->AddArray(velocity.GetPointer());
+        vtkSmartPointer<vtkDoubleArray> scalars = vtkSmartPointer<vtkDoubleArray>::New();
+        scalars->SetName(fieldName);
+        scalars->SetNumberOfComponents(1);
+        vtkGrid->GetCellData()->AddArray(scalars.GetPointer());
       }
-      vtkSmartPointer<vtkDoubleArray> velocity =
+      vtkSmartPointer<vtkDoubleArray> scalars =
         vtkDoubleArray::SafeDownCast(vtkGrid->GetCellData()->GetArray(fieldName));
       if ((strcmp(fieldName, "U") == 0)){
-        velocity->SetArray(attributes.GetUArray(), vtkGrid->GetNumberOfCells(), 1);
+        scalars->SetArray(attributes.GetUArray(), vtkGrid->GetNumberOfCells(), 1);
+      } else if ((strcmp(fieldName, "Q") == 0)) {
+        scalars->SetArray(attributes.GetQCriterionArray(), vtkGrid->GetNumberOfCells(), 1);
       }
     }
 
@@ -80,11 +82,11 @@ namespace
 
     vtkSmartPointer<vtkPointData> pointData = cellToPoint->GetOutput()->GetPointData();
 
-    vtkSmartPointer<vtkDoubleArray> velocity_cellToPoint =
+    vtkSmartPointer<vtkDoubleArray> scalars_cellToPoint =
       vtkArrayDownCast<vtkDoubleArray>(cellToPoint->GetOutput()->GetPointData()->GetAbstractArray(fieldName));
 
     if (idd->IsFieldNeeded(fieldName, vtkDataObject::POINT)){
-      vtkGrid->GetPointData()->AddArray(velocity_cellToPoint);
+      vtkGrid->GetPointData()->AddArray(scalars_cellToPoint);
     }
   }
 
@@ -98,7 +100,8 @@ namespace
       BuildVTKGrid(grid);
     }
     const char* ux_field = "U";
-    UpdateVTKAttributes(grid, attributes, idd, ux_field);
+    // UpdateVTKAttributes(grid, attributes, idd, ux_field);
+    UpdateVTKAttributes(grid, attributes, idd, "Q");
   }
 }
 

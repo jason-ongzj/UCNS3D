@@ -27,6 +27,7 @@ namespace
   const int UX = 1;
   const int UY = 2;
   const int UZ = 3;
+  const int Q = 4;
 
   // For conversion of C++ to Fortran functions, function names have to be
   // non-captialized since Fortran subroutines are case-insensitive.
@@ -58,7 +59,9 @@ namespace
   {
     double* velocity_x = attributes.GetUArray();
     double* velocity_y = attributes.GetVArray();
-    double* velocity_z = attributes.GetVArray();
+    double* velocity_z = attributes.GetWArray();
+    double* q_criterion = attributes.GetQCriterionArray();
+
     switch(*scalarDimension){
       case UX:
         attributes.UpdateFields(scalars, VELOCITY_X);
@@ -78,16 +81,24 @@ namespace
           std::cout << "W: " << *(velocity_z + 1) << "\n";
         }
         break;
+      case Q:
+        attributes.UpdateFields(scalars, Q_CRITERION);
+        if (q_criterion){
+          std::cout << "Q_Criterion: " << *(q_criterion + 1) << "\n";
+        }
+        break;
     }
 
     // Release memory for velocity pointers
     velocity_x = NULL;
     velocity_y = NULL;
     velocity_z = NULL;
+    q_criterion = NULL;
 
     delete velocity_x;
     delete velocity_y;
     delete velocity_z;
+    delete q_criterion;
   }
 
   extern "C" void coprocessor_initialize_(int* outputFrequency)

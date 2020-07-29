@@ -24,7 +24,7 @@ class Grid
     int numberOfCells;
 };
 
-enum Variable {DENSITY, VELOCITY_X, VELOCITY_Y, VELOCITY_Z, ENERGY};
+enum Variable {DENSITY, VELOCITY_X, VELOCITY_Y, VELOCITY_Z, Q_CRITERION};
 
 class Attributes
 {
@@ -38,7 +38,7 @@ class Attributes
     double* GetUArray();
     double* GetVArray();
     double* GetWArray();
-    double* GetEnergyArray();
+    double* GetQCriterionArray();
 
   private:
     Grid* GridPtr;
@@ -46,6 +46,6 @@ class Attributes
     std::vector<double> U;
     std::vector<double> V;
     std::vector<double> W;
-    std::vector<double> E; // Energy
+    std::vector<double> Q; // Energy
 };
 #endif

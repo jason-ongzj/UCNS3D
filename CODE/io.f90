@@ -15433,6 +15433,7 @@ if (ALLOCATED(scalarR) .eqv. .FALSE.) ALLOCATE(scalarR(kmaxe))
 if (ALLOCATED(scalarRU) .eqv. .FALSE.) ALLOCATE(scalarRU(kmaxe))
 if (ALLOCATED(scalarRV) .eqv. .FALSE.) ALLOCATE(scalarRV(kmaxe))
 if (ALLOCATED(scalarE) .eqv. .FALSE.) ALLOCATE(scalarE(kmaxe))
+if (ALLOCATED(qCriterion) .eqv. .FALSE.) ALLOCATE(qCriterion(kmaxe))
 
 ! Scalar R        - J = 1
 ! Scalar RU       - J = 2
@@ -15448,6 +15449,7 @@ DO i=1,Kmaxe
   scalarRU(I)=U_C(I)%VAL(1,2)
   scalarRV(I)=U_C(I)%VAL(1,3)
   scalarE(I)=U_C(I)%VAL(1,5)
+  qCriterion(I) = IELEM(N,I)%vortex(1)
 END DO
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)

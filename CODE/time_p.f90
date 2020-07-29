@@ -1830,6 +1830,7 @@ DO I=1,KMAXE
   scalarRU(I)=U_C(I)%VAL(1,2)
   scalarRV(I)=U_C(I)%VAL(1,3)
   scalarE(I)=U_C(I)%VAL(1,5)
+  qCriterion(I)=IELEM(N,I)%VORTEX(1)
 END DO
 !$OMP END DO
 
@@ -3031,18 +3032,19 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
           ! call densityfunction(scalarR)
           call gridfunction(pointSet, kmaxn, el_connect, XMPIELRANK(N), N)
           call densityfunction(scalarR)
-          write(*,*) "scalarR: ", scalarR(1), ", rank: ", N
+          write(*,*) "scalarR: ", scalarR(100), ", rank: ", N
           call scalarsfunction(scalarRU, 1)
-          write(*,*) "scalarRU: ", scalarRU(1), ", rank: ", N
+          write(*,*) "scalarRU: ", scalarRU(100), ", rank: ", N
           call scalarsfunction(scalarRV, 2)
-          write(*,*) "scalarRV: ", scalarRV(1), ", rank: ", N
+          write(*,*) "scalarRV: ", scalarRV(100), ", rank: ", N
+          call scalarsfunction(qCriterion, 4)
+          write(*,*) "qCriterion: ", qCriterion(100), ", rank: ", N
           call coproc_grid(dble(T))
 				   IF (N.EQ.0)THEN
 				  OPEN(63,FILE='history.txt',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
 				  WRITE(63,*)DT,it,"TIME STEP SIZE",T
 				  CLOSE(63)
 				  END IF
-
 
 					IF (INITCOND.eq.95)THEN
  				TOTK=0
@@ -3311,6 +3313,7 @@ DEALLOCATE(scalarRU)
 DEALLOCATE(scalarRV)
 DEALLOCATE(scalarE)
 DEALLOCATE(pointSet)
+DEALLOCATE(qCriterion)
 
 END SUBROUTINE TIME_MARCHING
 

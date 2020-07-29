@@ -154,7 +154,12 @@ void Attributes::UpdateFields(double* scalars, Variable var)
         break;
       }
 
-    case ENERGY:
+    case Q_CRITERION:
+      Q.clear();
+      for (int i = 0; i < GridPtr->GetNumberOfCells(); i++)
+      {
+        Q.insert(Q.begin()+i, *(scalars + i));
+      }
       break;
   }
 }
@@ -184,7 +189,7 @@ double* Attributes::GetWArray()
   return &(this->W[0]);
 }
 
-double* Attributes::GetEnergyArray()
+double* Attributes::GetQCriterionArray()
 {
-  return &(this->E[0]);
+  return &(this->Q[0]);
 }

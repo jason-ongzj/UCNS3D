@@ -124,6 +124,7 @@ cmake -DPARAVIEW_USE_PYTHON=ON \
 cmake -DPARAVIEW_USE_PYTHON=OFF \
 	-DPARAVIEW_BUILD_EDITION="CATALYST_RENDERING" \
 	-DPARAVIEW_USE_MPI=ON \
+	-DVTK_MODULE_ENABLE_VTK_ViewsInfovis:STRING=YES \
 	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../paraview
 
 cmake -DPARAVIEW_USE_PYTHON=ON \
@@ -131,6 +132,23 @@ cmake -DPARAVIEW_USE_PYTHON=ON \
 	-DPARAVIEW_USE_MPI=ON \
 	-DPARAVIEW_USE_FORTRAN=ON \
 	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../paraview
+
+-----------
+On HPC.
+
+module load CMake/3.15.3-GCCcore-8.3.0
+module load intel/2020a
+
+
+cmake -DPARAVIEW_USE_PYTHON=OFF \
+	-DPARAVIEW_BUILD_EDITION="CATALYST_RENDERING" \
+	-DPARAVIEW_USE_MPI=ON \
+	-DVTK_MODULE_ENABLE_VTK_ViewsInfovis:STRING=YES \
+	-DCMAKE_C_COMPILER="/apps/software/GCCcore/9.3.0/bin/gcc" \
+	-DCMAKE_CXX_COMPILER="/apps/software/GCCcore/9.3.0/bin/c++" \
+	-DCMAKE_Fortran_COMPILER="/apps/software/impi/2019.7.217-iccifort-2020.1.217/intel64/bin/mpiifort" \
+	-DMPI_C_LINK_FLAGS:STRING="-Xlinker --enable-new-dtags -Xlinker -Wl,-rpath -Xlinker /apps/software/impi/2019.7.217-iccifort-2020.1.217/intel64/lib/release/libmpi.so -Xlinker -Wl,-rpath -Xlinker /apps/software/impi/2019.7.217-iccifort-2020.1.217/intel64/lib/release/libmpi_ilp64.so" \
+	-DMPI_C_COMPILER="/apps/software/impi/2019.7.217-iccifort-2020.1.217/intel64/bin/mpiicc" ../paraview
 
 make -j 4 |& tee buildlog.txt
 
