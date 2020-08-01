@@ -189,20 +189,20 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   scalarBar->SetTextPositionToPrecedeScalarBar();
   scalarBar->SetWidth(0.8);
   scalarBar->SetHeight(0.1);
-  scalarBar->SetPosition(0.1, 0.05);
+  scalarBar->SetPosition(0.1, 0.08);
 
   // Geometry-specific settings
   // -------------------------------------------------------------------------
   // TGV-Coarse
-  camera->SetPosition(-6.962290992619889, 13.00713402789492, 18.716862694358497);
+  camera->SetPosition(-15.131393718362109, 11.197342387841433, -14.440502063555241);
   camera->SetFocalPoint(3.141592741012574, 3.1415927410125715, 3.1415927410125755);
-  camera->SetViewUp(0.21276442893019504, 0.8819412362199431, -0.4206078382969658);
-  camera->SetParallelScale(5.44139824412335);
+  camera->SetViewUp(0.2502916268143657, 0.9520257035449052, 0.17607146655959552);
+  camera->SetParallelScale(6.978615083554667);
   renderWindow->SetSize(900,520);
   scalarBar->SetTextPad(5); // Padding also controls the text size
-  title->SetDisplayPosition(40, 480);
+  title->SetDisplayPosition(40, 460);
   title_txtprop->SetFontSize(24);
-  quantity->SetDisplayPosition(390, 8);
+  quantity->SetDisplayPosition(390, 15);
   quantity_txtprop->SetFontSize(18);
   time->SetDisplayPosition(660, 100);
   time_txtprop->SetFontSize(18);
@@ -255,7 +255,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   compositeRenderManager->SetRenderWindow(renderWindow);
 
   // Disable this line to show onscreen render windows for non-root nodes
-  compositeRenderManager->InitializeOffScreen();
+  // compositeRenderManager->InitializeOffScreen();
 
   if(myId != 0){
     // Call for parallel rendering requests from other nodes

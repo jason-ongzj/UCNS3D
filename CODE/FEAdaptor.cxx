@@ -148,7 +148,7 @@ namespace FEAdaptor
     }
 
     std::cout << "Data description: " << Processor->RequestDataDescription(dataDescription) << "\n";
-    if (Processor->RequestDataDescription(dataDescription) != 0)
+    if (Processor->RequestDataDescription(dataDescription) != 0 && dataDescription->GetTimeStep() != 0)
     {
       vtkCPInputDataDescription* idd = dataDescription->GetInputDescriptionByName("input");
       BuildVTKDataStructures(grid, attributes, idd);

@@ -3305,7 +3305,6 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 
 
 
-!      call coprocess_grid(IT, dble(T))
 end do
 
 DEALLOCATE(scalarR)
