@@ -18,32 +18,8 @@
 // Fortran specific header
 #include "vtkCPPythonAdaptorAPI.h"
 
-// These will be called from the Fortran "glue" code"
-// Completely dependent on data layout, structured vs. unstructured, etc.
-// since VTK/ParaView uses different internal layouts for each.
-
 // Creates the data container for the CoProcessor.
-extern "C" void createcpimagedata_(int* nxstart, int* nxend, int* nx, int* ny, int* nz)
-{
-  if (!vtkCPPythonAdaptorAPI::GetCoProcessorData())
-  {
-    vtkGenericWarningMacro("Unable to access CoProcessorData.");
-    return;
-  }
-
-  // The simulation grid is a 3-dimensional topologically and geometrically
-  // regular grid. In VTK/ParaView, this is considered an image data set.
-  vtkSmartPointer<vtkImageData> grid = vtkSmartPointer<vtkImageData>::New();
-
-  grid->SetExtent(*nxstart - 1, *nxend - 1, 0, *ny - 1, 0, *nz - 1);
-
-  // Name should be consistent between here, Fortran and Python client script.
-  vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input")->SetGrid(grid);
-  vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input")->SetWholeExtent(
-    0, *nx - 1, 0, *ny - 1, 0, *nz - 1);
-}
-
-extern "C" void testfunction_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank, int* numprocs)
+extern "C" void creategrid_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank, int* numprocs)
 {
   // if (*rank == 0){
   if (!vtkCPPythonAdaptorAPI::GetCoProcessorData())
@@ -69,25 +45,6 @@ extern "C" void testfunction_(double pointSet[][3], int* pointSetSize, int vtkCe
   std::cout << "Process " << *rank << " with " <<  *numprocs << " processes involved."<< "\n";
   std::cout << "Checking size of pointSet: " << *pointSetSize << "\n";
   std::cout << "Checking size of vtkCellId: " << *vtkCellIdSetSize << "\n\n";
-
-  // Testing pointSet output
-  // if (*rank == 0){
-  //   for(int i = 0; i < *pointSetSize; i++){
-  //     std::cout << i+1 << ' ' << pointSet[i][0] << std::setprecision(10) << ' '
-  //               << pointSet[i][1] << std::setprecision(10) << ' '
-  //               << pointSet[i][2] << std::setprecision(10) << '\n';
-  //   }
-  // }
-  // Testing vtkCellId output
-  // if(*rank == 0){
-    // for(int j = 0; j < *vtkCellIdSetSize; j++){
-    //   for(int k = 0; k < 8; k++){
-    //     connectivity_array[j*8 + k] = vtkCellId[j][k];
-    //     if(k == 0){
-    //       offsets_array[j] = j*8;
-    //     }
-    //   }
-    // }
 
   // Serial process of registering point set
   for(int i=0; i < *pointSetSize; i++){

@@ -214,6 +214,12 @@ cmake -DUCNS3D_ROOT="$HOME/UCNS3D/CODE" \
    -DCMAKE_BUILD_TYPE:STRING=Release \
    -DCMAKE_Fortran_COMPILER="/apps/software/impi/2019.7.217-iccifort-2020.1.217/intel64/bin/mpiifort" ../
 
+parentdir="$(dirname "$(pwd)")"
+cmake -DUCNS3D_ROOT="$parentdir/CODE" \
+	-DCOMPILE_TARGET="CRESCENT" \
+	-DCMAKE_BUILD_TYPE:STRING=Release \
+	-DCMAKE_Fortran_COMPILER="/apps/software/impi/2019.7.217-iccifort-2020.1.217/intel64/bin/mpiifort" ../
+
 // 6. For visualization of UCNS3D-Catalyst from Paraview, run a vis terminal
 module spider binutils/2.27-GCCcore-6.3.0
 module load binutils/2.27-GCCcore-6.3.0

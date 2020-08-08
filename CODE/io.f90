@@ -12392,7 +12392,8 @@ END IF
 
 ! IF (TECPLOT.EQ.3)THEN		!BINARY PARAVIEW 3D ONLY
 !
-!   call OUTWRITEPARA3DbP
+!   ! call OUTWRITEPARA3DbP
+!   call INSITUPARA3DbP
 !
 ! END IF
 
@@ -15282,6 +15283,7 @@ CHARACTER(LEN=15)  :: str1,str2
 KMAXE=XMPIELRANK(N)
 
 allocate(xbin(kmaxe))
+if (ALLOCATED(scalarR) .eqv. .FALSE.) ALLOCATE(scalarR(kmaxe))
 if (ALLOCATED(scalarRU) .eqv. .FALSE.) ALLOCATE(scalarRU(kmaxe))
 if (ALLOCATED(scalarRV) .eqv. .FALSE.) ALLOCATE(scalarRV(kmaxe))
 if (ALLOCATED(scalarE) .eqv. .FALSE.) ALLOCATE(scalarE(kmaxe))
@@ -15341,6 +15343,9 @@ do j=1,NOF_VARIABLES
 
     IF (J.EQ.1)THEN
     WRITE(400+N)"SCALARS  R double 1"//lf
+    DO i=1,Kmaxe
+      scalarR(I)=U_C(I)%VAL(1,J)
+    END DO
     END IF
     IF (J.EQ.2)THEN
     WRITE(400+N)
@@ -15424,9 +15429,11 @@ INTEGER::KMAXE, I
 
 KMAXE=XMPIELRANK(N)
 
+if (ALLOCATED(scalarR) .eqv. .FALSE.) ALLOCATE(scalarR(kmaxe))
 if (ALLOCATED(scalarRU) .eqv. .FALSE.) ALLOCATE(scalarRU(kmaxe))
 if (ALLOCATED(scalarRV) .eqv. .FALSE.) ALLOCATE(scalarRV(kmaxe))
 if (ALLOCATED(scalarE) .eqv. .FALSE.) ALLOCATE(scalarE(kmaxe))
+if (ALLOCATED(qCriterion) .eqv. .FALSE.) ALLOCATE(qCriterion(kmaxe))
 
 ! Scalar R        - J = 1
 ! Scalar RU       - J = 2
@@ -15438,9 +15445,11 @@ if (ALLOCATED(scalarE) .eqv. .FALSE.) ALLOCATE(scalarE(kmaxe))
 ! Scalar voluemf  - J = 8
 
 DO i=1,Kmaxe
+  scalarR(I)=U_C(I)%VAL(1,1)
   scalarRU(I)=U_C(I)%VAL(1,2)
   scalarRV(I)=U_C(I)%VAL(1,3)
   scalarE(I)=U_C(I)%VAL(1,5)
+  qCriterion(I) = IELEM(N,I)%vortex(1)
 END DO
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)

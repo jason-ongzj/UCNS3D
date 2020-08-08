@@ -3,8 +3,6 @@ project(UCNS3D CXX C)
 
 include(CMakeDependentOption)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../VTK/CMake")
-
 set(MKLROOT /apps/software/imkl/2020.1.217-iimpi-2020a/compilers_and_libraries_2020.1.217/linux/mkl)
 set(PARAVIEW_CRESCENT_BUILD /apps/software/ParaView/5.8.0-intel-2020a-Python-3.8.2-mpi)
 
@@ -46,30 +44,11 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
   set(CMAKE_Fortran_FLAGS_RELEASE "-fdefault-real-8 -fdefault-double-8 -fopenmp -fbackslash -ffree-line-length-none -fcray-pointer -Ofast  -Wno-lto-type-mismatch ${BLASFLAGS}" CACHE STRING "")
 
   set(CMAKE_PREFIX_PATH ${PARAVIEW_BUILD} CACHE STRING "")
-  find_package(ParaView REQUIRED)
 
-  # Check if Catalyst is enabled for Paraview
-  if (NOT TARGET ParaView::PythonCatalyst)
-    message(STATUS
-      "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
-      "with Catalyst and Python support enabled. Please rebuild ParaView (or "
-      "point to a different build of ParaView) with PARAVIEW_ENABLE_PYTHON set "
-      "to TRUE")
-    return ()
-  endif ()
-
-  # Check if MPI is enabled for Paraview
-  if (NOT PARAVIEW_USE_MPI)
-    message(STATUS
-      "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
-      "with MPI support enabled. Please rebuild ParaView (or point to a "
-      "different build of ParaView) with PARAVIEW_USE_MPI set to TRUE")
-    return ()
-  endif ()
-  
 else ()
   # Compile with Intel compilers if compiled on Crescent
   set(PARAVIEW_BUILD_LIB "${PARAVIEW_CRESCENT_BUILD}/lib64")
+  set(PARAVIEW_DIR "${PARAVIEW_BUILD_LIB}/cmake/paraview-5.8")
   message(STATUS "Compiling UCNS3D on Crescent...")
 
   # Check if Paraview library directory exists
@@ -93,6 +72,28 @@ else ()
   set(CMAKE_Fortran_FLAGS_RELEASE "-i4 -r8 -O3 -xHost -fp-model precise -zero -qopenmp  -qopenmp-link=static ${BLASFLAGS}" CACHE STRING "")
 
   set(PYTHON_LIB "/apps/software/Python/3.8.2-GCCcore-9.3.0/lib/libpython3.8.so.1.0")
+  # set(CMAKE_PREFIX_PATH ${PARAVIEW_BUILD} CACHE STRING "")
+endif ()
+
+find_package(ParaView REQUIRED)
+
+# Check if Catalyst is enabled for Paraview
+if (NOT TARGET ParaView::PythonCatalyst)
+  message(STATUS
+    "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
+    "with Catalyst and Python support enabled. Please rebuild ParaView (or "
+    "point to a different build of ParaView) with PARAVIEW_ENABLE_PYTHON set "
+    "to TRUE")
+  return ()
+endif ()
+
+# Check if MPI is enabled for Paraview
+if (NOT PARAVIEW_USE_MPI)
+  message(STATUS
+    "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
+    "with MPI support enabled. Please rebuild ParaView (or point to a "
+    "different build of ParaView) with PARAVIEW_USE_MPI set to TRUE")
+  return ()
 endif ()
 
 # Check if Fortran compiler exists
