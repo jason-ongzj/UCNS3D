@@ -1,5 +1,6 @@
 #include "FEDataStructures.h"
 #include "FEAdaptor.h"
+#include "vtkCPVTKPipeline.h"
 
 #include <vtkCPProcessor.h>
 #include <vtkUnstructuredGrid.h>
@@ -12,7 +13,6 @@
 #include <vtkPointData.h>
 #include <vtkCellData.h>
 #include <vtkCellDataToPointData.h>
-#include "vtkCPVTKPipeline.h"
 #include <iostream>
 
 namespace
@@ -60,17 +60,21 @@ namespace
       if (vtkGrid->GetCellData()->GetNumberOfArrays() == 0)
       {
         // velocity X array
-        vtkSmartPointer<vtkDoubleArray> scalars = vtkSmartPointer<vtkDoubleArray>::New();
+        vtkSmartPointer<vtkDoubleArray> scalars =
+          vtkSmartPointer<vtkDoubleArray>::New();
         scalars->SetName(fieldName);
         scalars->SetNumberOfComponents(1);
         vtkGrid->GetCellData()->AddArray(scalars.GetPointer());
       }
       vtkSmartPointer<vtkDoubleArray> scalars =
-        vtkDoubleArray::SafeDownCast(vtkGrid->GetCellData()->GetArray(fieldName));
+        vtkDoubleArray::SafeDownCast(vtkGrid->GetCellData()->
+          GetArray(fieldName));
       if ((strcmp(fieldName, "U") == 0)){
-        scalars->SetArray(attributes.GetUArray(), vtkGrid->GetNumberOfCells(), 1);
+        scalars->SetArray(attributes.GetUArray(),
+          vtkGrid->GetNumberOfCells(), 1);
       } else if ((strcmp(fieldName, "Q") == 0)) {
-        scalars->SetArray(attributes.GetQCriterionArray(), vtkGrid->GetNumberOfCells(), 1);
+        scalars->SetArray(attributes.GetQCriterionArray(),
+          vtkGrid->GetNumberOfCells(), 1);
       }
     }
 
@@ -80,10 +84,12 @@ namespace
     cellToPoint->SetInputData(vtkGrid);
     cellToPoint->Update();
 
-    vtkSmartPointer<vtkPointData> pointData = cellToPoint->GetOutput()->GetPointData();
+    vtkSmartPointer<vtkPointData> pointData = cellToPoint->GetOutput()->
+      GetPointData();
 
     vtkSmartPointer<vtkDoubleArray> scalars_cellToPoint =
-      vtkArrayDownCast<vtkDoubleArray>(cellToPoint->GetOutput()->GetPointData()->GetAbstractArray(fieldName));
+      vtkArrayDownCast<vtkDoubleArray>(cellToPoint->GetOutput()->
+        GetPointData()->GetAbstractArray(fieldName));
 
     if (idd->IsFieldNeeded(fieldName, vtkDataObject::POINT)){
       vtkGrid->GetPointData()->AddArray(scalars_cellToPoint);
@@ -147,10 +153,13 @@ namespace FEAdaptor
       std::cout << "Processor is NULL.\n";
     }
 
-    std::cout << "Data description: " << Processor->RequestDataDescription(dataDescription) << "\n";
-    if (Processor->RequestDataDescription(dataDescription) != 0 && dataDescription->GetTimeStep() != 0)
+    std::cout << "Data description: " << Processor->
+      RequestDataDescription(dataDescription) << "\n";
+    if (Processor->RequestDataDescription(dataDescription) != 0 &&
+        dataDescription->GetTimeStep() != 0)
     {
-      vtkCPInputDataDescription* idd = dataDescription->GetInputDescriptionByName("input");
+      vtkCPInputDataDescription* idd = dataDescription->
+        GetInputDescriptionByName("input");
       BuildVTKDataStructures(grid, attributes, idd);
       idd->SetGrid(vtkGrid);
       Processor->CoProcess(dataDescription);

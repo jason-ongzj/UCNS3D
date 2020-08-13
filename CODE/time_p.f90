@@ -3028,8 +3028,7 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			TIMEC3=DUMMYIN(3)
 			TIMEC4=DUMMYIN(4)
 			TIMEC8=DUMMYIN(5)
-          ! call coprocess_grid(IT, dble(T))
-          ! call densityfunction(scalarR)
+
           call gridfunction(pointSet, kmaxn, el_connect, XMPIELRANK(N), N)
           call densityfunction(scalarR)
           write(*,*) "scalarR: ", scalarR(100), ", rank: ", N

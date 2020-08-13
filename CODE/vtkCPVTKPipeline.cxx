@@ -4,7 +4,6 @@
 #include <vtkCPInputDataDescription.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
-#include <vtkRenderView.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkCamera.h>
@@ -207,19 +206,6 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   time->SetDisplayPosition(660, 100);
   time_txtprop->SetFontSize(18);
 
-  // Transonic Cylinder
-  // camera->SetPosition(35.82379571216059, -3.9871568578962098, 329.7784155802543);
-  // camera->SetFocalPoint(35.82379571216059, -3.9871568578962098, 9.869604110717773);
-  // camera->SetFocalDisk(1.0);
-  // camera->Zoom(1.0);
-  // renderWindow->SetSize(1256, 799);
-  // scalarBar->SetTextPad(8);
-  // title_txtprop->SetFontSize(36);
-  // title->SetDisplayPosition(20, 750);
-  // quantity->SetDisplayPosition(578, 10);
-  // quantity_txtprop->SetFontSize(24);
-  // -------------------------------------------------------------------------
-
   std::cout << "scalarBar position: " << scalarBar->GetPosition()[0] <<
     ", " << scalarBar->GetPosition()[1] << "\n";
 
@@ -255,7 +241,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   compositeRenderManager->SetRenderWindow(renderWindow);
 
   // Disable this line to show onscreen render windows for non-root nodes
-  // compositeRenderManager->InitializeOffScreen();
+  compositeRenderManager->InitializeOffScreen();
 
   if(myId != 0){
     // Call for parallel rendering requests from other nodes
@@ -281,7 +267,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
     compositeRenderManager->GetRenderWindow()->Finalize();
     window_to_image_filter->Delete();
 
-    compositeRenderManager ->StopServices();
+    compositeRenderManager->StopServices();
   }
 
   std::cout << "myId passed: " << myId << "\n";

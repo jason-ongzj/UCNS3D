@@ -108,8 +108,8 @@ void Attributes::UpdateFields(double* scalars, Variable var)
           } else {
             U.clear();
             for (int i = 0; i < GridPtr->GetNumberOfCells(); i++){
-              // double rho = Rho.at(i);
-              U.insert(U.begin()+i, *(scalars + i));
+              double rho = Rho.at(i);
+              U.insert(U.begin()+i, *(scalars + i)/rho);
             }
           }
         } catch (...) {

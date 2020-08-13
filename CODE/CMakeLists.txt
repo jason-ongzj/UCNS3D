@@ -61,36 +61,12 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
   target_link_libraries(ucns3d_p
   PRIVATE
     ${MPI_Fortran_LIBRARIES}  ParMetis Metis TecIo -no-pie
-    # ParaView::PythonCatalyst
     VTK::CommonDataModel
     VTK::CommonCore
     VTK::IOLegacy
     VTK::FiltersCore
     ${BLASLIBS} openblas
   )
-
-  if (${USE_PYTHON})
-    target_link_libraries(ucns3d_p
-    PRIVATE
-      ParaView::PythonCatalyst
-    )
-  else ()
-    target_link_libraries(ucns3d_p
-    PRIVATE
-      ParaView::Catalyst
-      ParaView::VTKExtensionsCore
-      VTK::IOImage
-      VTK::ViewsInfovis
-      VTK::RenderingAnnotation
-      VTK::RenderingVolume
-      VTK::RenderingCore
-      VTK::FiltersGeometry
-      VTK::CommonColor
-      VTK::ParallelMPI
-      VTK::ParallelCore
-      VTK::RenderingParallel
-    )
-  endif ()
 
 else ()
 
@@ -110,100 +86,38 @@ else ()
     IMPORTED_LOCATION ${MKLROOT}/lib/intel64/libmkl_core.a
   )
 
-  # Paraview shared libraries on HPC
-  add_library(PVPythonCatalyst SHARED IMPORTED)
-  set_target_properties(PVPythonCatalyst PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkPVPythonCatalyst-pv5.8.so
-  )
-
-  add_library(IOLegacy SHARED IMPORTED)
-  set_target_properties(IOLegacy PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkIOLegacy-pv5.8.so
-  )
-
-  add_library(PVCatalyst SHARED IMPORTED)
-  set_target_properties(PVCatalyst PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkPVCatalyst-pv5.8.so
-  )
-
-  add_library(IOCore SHARED IMPORTED)
-  set_target_properties(IOCore PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkIOCore-pv5.8.so
-  )
-
-  add_library(FiltersCore SHARED IMPORTED)
-  set_target_properties(FiltersCore PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkFiltersCore-pv5.8.so
-  )
-
-  add_library(CommonExecutionModel SHARED IMPORTED)
-  set_target_properties(CommonExecutionModel PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonExecutionModel-pv5.8.so
-  )
-
-  add_library(CommonDataModel SHARED IMPORTED)
-  set_target_properties(CommonDataModel PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonDataModel-pv5.8.so
-  )
-
-  add_library(CommonTransforms SHARED IMPORTED)
-  set_target_properties(CommonTransforms PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonTransforms-pv5.8.so
-  )
-
-  add_library(CommonSystem SHARED IMPORTED)
-  set_target_properties(CommonSystem PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonSystem-pv5.8.so
-  )
-
-  add_library(CommonMisc SHARED IMPORTED)
-  set_target_properties(CommonMisc PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonMisc-pv5.8.so
-  )
-
-  add_library(CommonMath SHARED IMPORTED)
-  set_target_properties(CommonMath PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonMath-pv5.8.so
-  )
-
-  add_library(PythonInterpreter SHARED IMPORTED)
-  set_target_properties(PythonInterpreter PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkPythonInterpreter-pv5.8.so
-  )
-
-  add_library(Python_3 SHARED IMPORTED)
-  set_target_properties(Python_3 PROPERTIES
-    IMPORTED_LOCATION ${PYTHON_LIB}
-  )
-
-  add_library(CommonCore SHARED IMPORTED)
-  set_target_properties(CommonCore PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtkCommonCore-pv5.8.so
-  )
-
-  add_library(Sys SHARED IMPORTED)
-  set_target_properties(Sys PROPERTIES
-    IMPORTED_LOCATION ${PARAVIEW_BUILD_LIB}/libvtksys-pv5.8.so
-  )
-
   target_link_libraries(ucns3d_p
   PRIVATE
-    MPI::MPI_Fortran ParMetis Metis TecIo
-    -Wl,--start-group Mkl_Intel_Lp64 Mkl_Sequential Mkl_Core -Wl,--end-group pthread
-    PVPythonCatalyst CommonDataModel IOLegacy ${BLASLIBS}
-    PythonInterpreter Python_3
-    IOCore PVCatalyst FiltersCore CommonExecutionModel
-    CommonDataModel CommonTransforms CommonSystem
-    CommonMisc CommonMath CommonCore Sys
-    dl stdc++ -Wl,-rpath-link,${PARAVIEW_BUILD_LIB}
+    MPI::MPI_Fortran ParMetis Metis TecIo -no-pie
+    -Wl,--start-group Mkl_Intel_Lp64 Mkl_Sequential Mkl_Core
+    -Wl,--end-group pthread
+    VTK::CommonDataModel
+    VTK::CommonCore
+    VTK::IOLegacy
+    VTK::FiltersCore
+    ${BLASLIBS} dl stdc++ -Wl,-rpath-link,${PARAVIEW_BUILD_LIB}
   )
 
   target_include_directories(ucns3d_p
     PUBLIC
       "/apps/software/ParaView/5.8.0-intel-2020a-Python-3.8.2-mpi/include/paraview-5.8"
   )
-
 endif ()
+
+target_link_libraries(ucns3d_p
+  PRIVATE
+    ParaView::Catalyst
+    ParaView::VTKExtensionsCore
+    VTK::IOImage
+    VTK::RenderingAnnotation
+    VTK::RenderingVolume
+    VTK::RenderingCore
+    VTK::FiltersGeometry
+    VTK::CommonColor
+    VTK::ParallelMPI
+    VTK::ParallelCore
+    VTK::RenderingParallel
+)
 
 set_property(TARGET ucns3d_p
   PROPERTY
