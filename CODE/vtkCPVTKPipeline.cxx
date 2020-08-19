@@ -205,6 +205,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   quantity_txtprop->SetFontSize(18);
   time->SetDisplayPosition(660, 100);
   time_txtprop->SetFontSize(18);
+  // -------------------------------------------------------------------------
 
   std::cout << "scalarBar position: " << scalarBar->GetPosition()[0] <<
     ", " << scalarBar->GetPosition()[1] << "\n";
@@ -246,9 +247,7 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
   if(myId != 0){
     // Call for parallel rendering requests from other nodes
     compositeRenderManager ->StartServices();
-  }
-
-  if (myId == 0){
+  } else {
     compositeRenderManager->GetRenderWindow()->Render();
     vtkWindowToImageFilter* window_to_image_filter = vtkWindowToImageFilter::New();
     window_to_image_filter->SetInput(compositeRenderManager->GetRenderWindow());
@@ -269,8 +268,6 @@ int vtkCPVTKPipeline::CoProcess(vtkCPDataDescription* dataDescription)
 
     compositeRenderManager->StopServices();
   }
-
-  std::cout << "myId passed: " << myId << "\n";
 
   controller->Barrier();
 

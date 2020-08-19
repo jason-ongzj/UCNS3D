@@ -13,7 +13,7 @@ class Grid
     int GetNumberOfPoints();
     int GetNumberOfCells();
     double* GetPointsArray();
-    double* GetPoint(size_t pointId);
+    // double* GetPoint(size_t pointId);
     unsigned int* GetCellPoints(size_t cellId);
 
   private:
@@ -46,6 +46,6 @@ class Attributes
     std::vector<double> U;
     std::vector<double> V;
     std::vector<double> W;
-    std::vector<double> Q; // Energy
+    std::vector<double> Q;
 };
 #endif
