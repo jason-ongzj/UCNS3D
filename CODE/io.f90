@@ -15422,7 +15422,7 @@ END SUBROUTINE OUTWRITEPARA3DbP
 
 SUBROUTINE INSITUPARA3DbP
 !> @brief
-!> This subroutine writes the solution and the grid file in binary vtk format
+!> This subroutine only writes the scalar data in memory
 use ISO_C_BINDING
 IMPLICIT NONE
 INTEGER::KMAXE, I

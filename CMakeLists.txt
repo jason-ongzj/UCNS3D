@@ -3,8 +3,10 @@ project(UCNS3D CXX C)
 
 include(CMakeDependentOption)
 
-set(MKLROOT /apps/software/imkl/2020.1.217-iimpi-2020a/compilers_and_libraries_2020.1.217/linux/mkl)
-set(PARAVIEW_CRESCENT_BUILD /apps/software/ParaView/5.8.0-intel-2020a-Python-3.8.2-mpi)
+set(MKLROOT "/apps/software/imkl/2020.1.217-iimpi-2020a/\
+compilers_and_libraries_2020.1.217/linux/mkl")
+set(PARAVIEW_CRESCENT_BUILD "/apps/software/ParaView/\
+5.8.0-intel-2020a-Python-3.8.2-mpi")
 
 find_package(Python COMPONENTS Interpreter Development)
 message("${Python_LIBRARIES}")
@@ -39,9 +41,14 @@ if (${COMPILE_TARGET} STREQUAL "LOCAL")
 
   set(BLASFLAGS "-I /usr/local/include")
   set(BLASLIBS "-L/usr/local/lib")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-ffree-line-length-none -fdefault-real-8 -fopenmp -Wall -Wno-unused-parameter  -fbounds-check -finit-local-zero  -fdump-parse-tree -fdump-core -fbacktrace -fdefault-double-8 -fbackslash  -O0 -fcray-pointer -Wno-lto-type-mismatch ${BLASFLAGS}" CACHE STRING "")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-ffree-line-length-none -fdefault-real-8 \
+    -fopenmp -Wall -Wno-unused-parameter  -fbounds-check -finit-local-zero \
+    -fdump-parse-tree -fdump-core -fbacktrace -fdefault-double-8 -fbackslash \
+    -O0 -fcray-pointer -Wno-lto-type-mismatch ${BLASFLAGS}" CACHE STRING "")
 
-  set(CMAKE_Fortran_FLAGS_RELEASE "-fdefault-real-8 -fdefault-double-8 -fopenmp -fbackslash -ffree-line-length-none -fcray-pointer -Ofast  -Wno-lto-type-mismatch ${BLASFLAGS}" CACHE STRING "")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-fdefault-real-8 -fdefault-double-8 \
+    -fopenmp -fbackslash -ffree-line-length-none -fcray-pointer -Ofast \
+    -Wno-lto-type-mismatch ${BLASFLAGS}" CACHE STRING "")
 
   set(CMAKE_PREFIX_PATH ${PARAVIEW_BUILD} CACHE STRING "")
 
@@ -65,14 +72,19 @@ else ()
 	"-- ..........................................")
 
   set(BLASFLAGS "-I ${MKLROOT}/include")
-  set(BLASLIBS "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl")
+  set(BLASLIBS "-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a \
+    ${MKLROOT}/lib/intel64/libmkl_sequential.a \
+    ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl")
 
-  set(CMAKE_Fortran_FLAGS_DEBUG "-i4 -r8 -O0 -g -debug all -xHost -traceback -qopenmp -qopenmp-link=static ${BLASFLAGS} -check bounds -fp-model strict -debug inline-debug-info -zero -Wl,--no-as-needed -Wl,--unresolved-symbols=ignore-in-shared-libs" CACHE STRING "")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-i4 -r8 -O0 -g -debug all -xHost -traceback \
+    -qopenmp -qopenmp-link=static ${BLASFLAGS} -check bounds -fp-model strict \
+    -debug inline-debug-info -zero -Wl,--no-as-needed \
+    -Wl,--unresolved-symbols=ignore-in-shared-libs" CACHE STRING "")
 
-  set(CMAKE_Fortran_FLAGS_RELEASE "-i4 -r8 -O3 -xHost -fp-model precise -zero -qopenmp  -qopenmp-link=static ${BLASFLAGS}" CACHE STRING "")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-i4 -r8 -O3 -xHost -fp-model precise -zero \
+    -qopenmp  -qopenmp-link=static ${BLASFLAGS}" CACHE STRING "")
 
   set(PYTHON_LIB "/apps/software/Python/3.8.2-GCCcore-9.3.0/lib/libpython3.8.so.1.0")
-  # set(CMAKE_PREFIX_PATH ${PARAVIEW_BUILD} CACHE STRING "")
 endif ()
 
 find_package(ParaView REQUIRED)
@@ -91,8 +103,8 @@ endif ()
 if (NOT PARAVIEW_USE_MPI)
   message(STATUS
     "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
-    "with MPI support enabled. Please rebuild ParaView (or point to a "
-    "different build of ParaView) with PARAVIEW_USE_MPI set to TRUE")
+    "with MPI support enabled. Please rebuild ParaView (or point to a different "
+    "build of ParaView) with PARAVIEW_USE_MPI set to TRUE")
   return ()
 endif ()
 
@@ -105,7 +117,9 @@ if (CMAKE_Fortran_COMPILER)
 
     # Check if Fortran MPI compiler is found
     if (NOT MPI_Fortran_FOUND)
-      message(STATUS "Skipping example: ${CMAKE_PROJECT_NAME} requires MPI support, but none was found.")
+      message(STATUS
+        "Skipping example: ${CMAKE_PROJECT_NAME} requires MPI \
+        support, but none was found.")
       return ()
     endif ()
 

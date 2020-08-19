@@ -1,4 +1,4 @@
-module tcp
+module FORTRAN_ADAPTOR
   use iso_c_binding
   use DECLARATION
   USE MPIINFO
@@ -13,9 +13,9 @@ subroutine coprocess_grid(step,time)
   integer, intent(in) :: step
   real*8, intent(in) :: time
   integer :: flag
-  !
+
   call requestdatadescription(step,time,flag)
-  !
+
   if (flag .ne. 0) then
     call needtocreategrid(flag)
     if (flag .ne. 0) then
@@ -31,4 +31,4 @@ subroutine coprocess_grid(step,time)
   return
 end subroutine
 
-end module tcp
+end module FORTRAN_ADAPTOR

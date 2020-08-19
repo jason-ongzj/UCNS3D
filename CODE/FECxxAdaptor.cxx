@@ -19,7 +19,8 @@
 #include "vtkCPPythonAdaptorAPI.h"
 
 // Creates the data container for the CoProcessor.
-extern "C" void creategrid_(double pointSet[][3], int* pointSetSize, int vtkCellId[][8], int* vtkCellIdSetSize, int* rank, int* numprocs)
+extern "C" void creategrid_(double pointSet[][3], int* pointSetSize,
+    int vtkCellId[][8], int* vtkCellIdSetSize, int* rank, int* numprocs)
 {
   // if (*rank == 0){
   if (!vtkCPPythonAdaptorAPI::GetCoProcessorData())

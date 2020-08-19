@@ -55,7 +55,7 @@ set_target_properties(TecIo PROPERTIES
 if (${COMPILE_TARGET} STREQUAL "LOCAL")
   target_link_libraries(ucns3d_p
   PRIVATE
-    ${MPI_Fortran_LIBRARIES}  ParMetis Metis TecIo -no-pie
+    ${MPI_Fortran_LIBRARIES} ParMetis Metis TecIo -no-pie
     ParaView::PythonCatalyst
     VTK::CommonDataModel
     VTK::IOLegacy
@@ -93,7 +93,6 @@ else ()
     PUBLIC
       "/apps/software/ParaView/5.8.0-intel-2020a-Python-3.8.2-mpi/include/paraview-5.8"
   )
-
 endif ()
 
 set_property(TARGET ucns3d_p

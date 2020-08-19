@@ -1,5 +1,5 @@
-
 #--------------------------------------------------------------
+# Catalyst pipeline code for coarse TGV
 
 # Global timestep output options
 timeStepToStartOutputAt=0
@@ -39,7 +39,7 @@ def CreateCoProcessor():
 
       # trace generated using paraview version 5.8.0
       #
-      # To ensure correct image size when batch processing, please search 
+      # To ensure correct image size when batch processing, please search
       # for and uncomment the line `# renderView*.ViewSize = [*,*]`
 
       #### disable automatic camera reset on 'Show'
@@ -142,7 +142,7 @@ def CreateCoProcessor():
       # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
       threshold1Display.OpacityTransferFunction.Points = [-0.8807195516841666, 0.0, 0.5, 0.0, 0.8622516214808866, 1.0, 0.5, 0.0]
 
-      # show data from text1
+      # show data from text
       text1Display = Show(text1, renderView1, 'TextSourceRepresentation')
 
       # trace defaults for the display properties.
@@ -214,7 +214,7 @@ coprocessor = CreateCoProcessor()
 
 #--------------------------------------------------------------
 # Enable Live-Visualizaton with ParaView and the update frequency
-coprocessor.EnableLiveVisualization(False, 1)
+coprocessor.EnableLiveVisualization(True, 1)
 
 # ---------------------- Data Selection method ----------------------
 
