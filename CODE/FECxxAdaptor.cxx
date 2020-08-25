@@ -22,7 +22,6 @@
 extern "C" void creategrid_(double pointSet[][3], int* pointSetSize,
     int vtkCellId[][8], int* vtkCellIdSetSize, int* rank, int* numprocs)
 {
-  // if (*rank == 0){
   if (!vtkCPPythonAdaptorAPI::GetCoProcessorData())
   {
     vtkGenericWarningMacro("Unable to access CoProcessorData.");
@@ -69,7 +68,6 @@ extern "C" void creategrid_(double pointSet[][3], int* pointSetSize,
 
 // Add field(s) to the data container.
 // Separate from above because this will be dynamic, grid is static.
-// By hand name mangling for fortran.
 extern "C" void addfield_(double* scalars, char* name)
 {
   vtkCPInputDataDescription* idd =
