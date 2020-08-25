@@ -1,0 +1,80 @@
+FROM ubuntu:bionic AS base
+
+RUN apt-get update && apt-get install -y libtool-bin autoconf python-pip libx11-dev libxext-dev x11proto-core-dev x11proto-gl-dev libglew-dev freeglut3-dev bison flex
+
+# Build Mesa
+RUN apt-get install -y wget pkg-config zlib1g-dev llvm-dev
+RUN wget https://mesa.freedesktop.org/archive/mesa-18.2.4.tar.xz
+RUN tar xf mesa-18.2.4.tar.xz
+RUN mkdir mesa-18.2.4/build
+WORKDIR mesa-18.2.4/build
+
+RUN ../configure --disable-dri \
+        --enable-opengl --disable-osmesa --disable-gallium-osmesa \
+	--enable-glx --with-platforms=x11 --disable-gles1 --disable-gles2 \
+	--disable-va --disable-gbm --disable-xvmc --disable-vdpau \
+	--disable-shared-glapi --disable-dri --with-dri-drivers= \ 
+	--enable-llvm \
+	--with-gallium-drivers=swrast,swr --with-swr-archs=avx,avx2 --disable-egl
+
+RUN make -j4 && make install
+
+RUN apt-get install -y git build-essential libgl1-mesa-dev libxt-dev qt5-default libqt5x11extras5-dev libqt5help5 qttools5-dev qtxmlpatterns5-dev-tools libqt5svg5-dev python3-dev libtbb-dev libopenblas-dev make wget libssl-dev mesa-utils mpich
+
+# Setup our environment variables.
+ENV XVFB_WHD="1920x1080x24"\
+    LIBGL_ALWAYS_SOFTWARE="1" \
+    GALLIUM_DRIVER="softpipe"
+
+# Build CMake
+WORKDIR /home
+
+ENV VERSION=3.15 \
+    BUILD=4 
+
+RUN apt-get remove libopenmpi-dev openmpi-bin openmpi-common
+
+RUN apt-get install -y git build-essential libgl1-mesa-dev libxt-dev qt5-default libqt5x11extras5-dev libqt5help5 qttools5-dev qtxmlpatterns5-dev-tools libqt5svg5-dev python3-dev libtbb-dev libopenblas-dev make wget libssl-dev mesa-utils mpich
+
+RUN mkdir ~/temp && cd ~/temp
+
+RUN wget https://cmake.org/files/v$VERSION/cmake-$VERSION.$BUILD.tar.gz
+RUN tar -xzvf cmake-$VERSION.$BUILD.tar.gz
+
+RUN cd cmake-$VERSION.$BUILD/ && ./bootstrap && make -j4 && make install
+
+# Build ParaView
+FROM base AS pvsource
+
+RUN git clone https://gitlab.kitware.com/paraview/paraview.git
+RUN cd paraview && git checkout v5.8.0 && git submodule update --init --recursive
+
+FROM pvsource AS pvbuild
+RUN mkdir /home/pv_5.8 && cd /home/pv_5.8 && \
+    cmake -DPARAVIEW_USE_PYTHON=ON \
+	-DPARAVIEW_USE_MPI=ON \
+	-DPARAVIEW_USE_FORTRAN=ON \
+	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" \
+	-DCMAKE_C_COMPILER="/usr/bin/cc" \
+	-DMPI_C_COMPILER="/usr/bin/mpicc" \
+	-DOPENGL_gl_LIBRARY=/usr/local/lib/libGL.so \
+	-DOPENGL_INCLUDE_DIR=/usr/local/include/GL \
+	-DOPENGL_EGL_INCLUDE_DIR= -DOPENGL_GLES2_INCLUDE_DIR= \
+	-DOPENGL_GLES3_INCLUDE_DIR= -DOPENGL_GLX_INCLUDE_DIR= \
+	-DOPENGL_egl_LIBRARY= -DOPENGL_gles2_LIBRARY=  \
+	-DOPENGL_gles3_LIBRARY= -DOPENGL_glu_LIBRARY= \
+	-DOPENGL_glx_LIBRARY= -DOPENGL_opengl_LIBRARY= ../paraview && \
+    make -j4
+
+RUN git clone https://github.com/jason-ongzj/UCNS3D.git
+RUN cd UCNS3D && git checkout Catalyst_nopy && \
+    mkdir build && cd build && \
+    cmake -DPARAVIEW_BUILD="/home/pv_5.8" \
+	-DUCNS3D_ROOT="/home/UCNS3D/CODE" \
+	-DCOMPILE_TARGET="LOCAL" \
+	-DCMAKE_BUILD_TYPE:STRING=Release \
+	-DCMAKE_Fortran_COMPILER="/usr/bin/mpifort" ../ && \
+    make
+
+RUN cd /home/UCNS3D/build/CODE && mkdir RUN && cd RUN && cp ../ucns3d_p . && \
+    cp ../../../Catalyst_Test_Case/TGV/* .

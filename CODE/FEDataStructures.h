@@ -13,11 +13,9 @@ class Grid
     int GetNumberOfPoints();
     int GetNumberOfCells();
     double* GetPointsArray();
-    // double* GetPoint(size_t pointId);
     unsigned int* GetCellPoints(size_t cellId);
 
   private:
-    // vtkPoints* points;
     std::vector<double> Points;
     std::vector<unsigned int> Cells;
     int numberOfPoints;

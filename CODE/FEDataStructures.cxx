@@ -58,15 +58,6 @@ double* Grid::GetPointsArray()
   return &(this->Points[0]);
 }
 
-// double* Grid::GetPoint(size_t pointId)
-// {
-//   if (pointId >= this->Points.size())
-//   {
-//     return NULL;
-//   }
-//   return &(this->Points[pointId * 3]);
-// }
-
 unsigned int* Grid::GetCellPoints(size_t cellId)
 {
   if (cellId >= this->Cells.size())
